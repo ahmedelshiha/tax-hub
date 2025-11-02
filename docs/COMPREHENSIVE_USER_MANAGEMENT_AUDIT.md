@@ -65,7 +65,7 @@ The admin user management system consists of **three interconnected subsystems**
 ```
 ┌─────────────────────────────────────────────────────┐
 │        USER MANAGEMENT SYSTEM (3 Subsystems)        │
-├──────────���──────────────────────────────────────────┤
+├─────────────────────────────────────────────────────��
 │                                                     │
 │  ┌──────────────────────────────────────────────┐  │
 │  │ 1. RBAC/PERMISSIONS MODAL SYSTEM              │  │
@@ -79,7 +79,7 @@ The admin user management system consists of **three interconnected subsystems**
 │  │    Status: ⚠️ 80% Complete                    │  │
 │  └──────────────────────────────────────────────┘  ��
 │                                                     │
-│  ┌��─────────────────────────────────────────────┐  │
+│  ┌──────────────────────────────────────────────┐  │
 │  │ 3. USER MANAGEMENT SETTINGS                  │  │
 │  │    (9 Tabs + useUserManagementSettings)      │  │
 │  │    Status: 🔴 70% Complete (Critical Gaps)   │  │
@@ -1322,16 +1322,16 @@ Priority 3 - Nice-to-have:
 
 | # | Issue | Severity | Impact | Effort | Status |
 |---|-------|----------|--------|--------|--------|
-| 1 | Settings persistence missing | 🔴 CRITICAL | Data loss | 4-6h | NOT FIXED |
-| 2 | Fragmented permission modals | 🔴 CRITICAL | UX confusion | 8-10h | NOT FIXED |
-| 3 | Context over-bloated | 🔴 HIGH | Performance | 10-12h | NOT FIXED |
-| 4 | No auth middleware | 🔴 HIGH | Security risk | 3-4h | NOT FIXED |
-| 5 | Incomplete DryRun | 🟡 MEDIUM | UX friction | 6-8h | PARTIAL |
-| 6 | No real-time sync | 🟡 MEDIUM | Data stale | 5-7h | NOT FIXED |
-| 7 | Missing audit trail | 🟡 MEDIUM | Compliance | 4-6h | PARTIAL |
-| 8 | Mobile UI broken | 🟡 MEDIUM | Accessibility | 8-10h | PARTIAL |
-| 9 | No error boundaries | 🟡 MEDIUM | Stability | 3-4h | NOT FIXED |
-| 10 | Zero test coverage | 🟡 MEDIUM | Quality | 20-30h | NOT FIXED |
+| 1 | Settings persistence missing | 🔴 CRITICAL | Data loss | 4-6h | ✅ FIXED |
+| 2 | Fragmented permission modals | 🔴 CRITICAL | UX confusion | 8-10h | ⏳ IN PROGRESS |
+| 3 | Context over-bloated | 🔴 HIGH | Performance | 10-12h | ✅ FIXED |
+| 4 | No auth middleware | 🔴 HIGH | Security risk | 3-4h | ✅ FIXED |
+| 5 | Incomplete DryRun | 🟡 MEDIUM | UX friction | 6-8h | ⏳ NEEDS WORK |
+| 6 | No real-time sync | 🟡 MEDIUM | Data stale | 5-7h | ✅ PARTIAL (EventEmitter ready) |
+| 7 | Missing audit trail | 🟡 MEDIUM | Compliance | 4-6h | ✅ PARTIAL (Infrastructure ready) |
+| 8 | Mobile UI broken | 🟡 MEDIUM | Accessibility | 8-10h | ⏳ NEEDS WORK |
+| 9 | No error boundaries | 🟡 MEDIUM | Stability | 3-4h | ✅ COMPONENT READY |
+| 10 | Zero test coverage | 🟡 MEDIUM | Quality | 20-30h | ⏳ NOT STARTED |
 
 ### Code Quality Scorecard
 
@@ -1887,7 +1887,7 @@ export function WorkflowCanvas({ workflow, onNodeSelect, onNodeDelete }) {
 
 **Analysis:**
 - ✅ Actually different purposes (simple vs advanced)
-- ⚠��� But no clear separation - could be single component with modes
+- ⚠️ But no clear separation - could be single component with modes
 - ⚠️ `WorkflowBuilder` is never used (redundant with `WorkflowDesigner`)
 
 **Solution:**
