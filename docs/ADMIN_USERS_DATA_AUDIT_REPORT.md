@@ -3862,3 +3862,239 @@ All implementations have been verified in the actual codebase. The system is pro
 **Risk Level:** 🟢 VERY LOW
 
 ---
+
+## 🔄 PHASE 2.3: REAL-TIME SYNC - INFRASTRUCTURE ASSESSMENT (Current Session)
+
+### Executive Summary
+**Phase 2.3 Real-Time Sync discovered comprehensive SSE-based real-time infrastructure already in place. No WebSocket implementation needed. Task is to integrate existing infrastructure with user management contexts.**
+
+### Real-Time Infrastructure Discovery
+
+#### ✅ Core Real-Time Services (Production-Ready)
+
+**File:** `src/lib/realtime-enhanced.ts` ✅ VERIFIED
+- **EnhancedRealtimeService** - SSE connection manager with:
+  - Request deduplication & connection pooling
+  - Event subscription filtering by type
+  - Graceful error handling & cleanup
+  - Metrics tracking (connection count, events processed)
+
+**Pub/Sub Adapters:**
+- **InMemoryPubSub** - For local development
+- **PostgresPubSub** - For production (LISTEN/NOTIFY via pg module)
+  - Environment: `REALTIME_TRANSPORT=postgres`
+  - Database: Uses `REALTIME_PG_URL` or `DATABASE_URL`
+  - Channel: `REALTIME_PG_CHANNEL` (default: "app_events")
+
+#### ✅ Event Type Contracts (Strongly Typed)
+
+**File:** `src/lib/realtime-events.ts` ✅ VERIFIED
+- **ADMIN_REALTIME_EVENTS** - Enum of 10+ event types
+- **AdminRealtimeEventMessage** - Discriminated union types
+- **Event Types Available:**
+  - `service-request-updated`
+  - `task-updated`
+  - `user-role-updated`
+  - `team-assignment`
+  - `availability-updated`
+  - (Extensible for new events)
+
+#### ✅ SSE Server Endpoints (HTTP)
+
+| Endpoint | File | Purpose | Auth | Status |
+|----------|------|---------|------|--------|
+| `/api/admin/realtime` | `src/app/api/admin/realtime/route.ts` | Admin dashboard real-time | ✅ Required | ✅ Active |
+| `/api/portal/realtime` | `src/app/api/portal/realtime/route.ts` | Portal real-time | ✅ Tenant context | ✅ Active |
+
+**Both endpoints:**
+- Return `text/event-stream` for SSE
+- Include 25-second keepalive pings
+- Support event type filtering via query param
+- Handle graceful disconnection & cleanup
+
+#### ✅ Client-Side Providers
+
+**File:** `src/components/dashboard/realtime/RealtimeProvider.tsx` ✅ VERIFIED
+- React context provider for admin dashboards
+- Connects to `/api/admin/realtime`
+- Features:
+  - Connection state tracking
+  - Event subscription with type filtering
+  - Unsubscribe callbacks
+  - Telemetry posting to `/api/admin/perf-metrics`
+
+#### ✅ Existing Client Hooks
+
+| Hook | File | Purpose | Status |
+|------|------|---------|--------|
+| `useRealtime()` | `src/hooks/useRealtime.ts` | Portal real-time (WebSocket → SSE fallback) | ✅ Active |
+| `useBookingsSocket()` | `src/hooks/useBookingsSocket.ts` | Bookings-specific real-time | ✅ Active |
+| `useClientNotifications()` | `src/hooks/useClientNotifications.ts` | Portal notifications from real-time | ✅ Active |
+| `useRoleSync()` | `src/hooks/useRoleSync.ts` | Auto-sync session on role changes | ✅ Active |
+| `useAdminRealtime()` | `src/components/dashboard/realtime/RealtimeProvider.tsx` | Admin realtime context hook | ✅ Active |
+
+#### ✅ In-Process Event Emitter (Non-Network)
+
+**File:** `src/lib/event-emitter.ts` ✅ VERIFIED
+- **globalEventEmitter** - Local EventEmitter with:
+  - Subscribe/once subscriptions
+  - Emit with history for late subscribers
+  - Used for cross-component UI communication
+  - Events: `role:created`, `role:updated`, `permission:changed`, etc.
+
+### Recommended Phase 2.3 Implementation
+
+#### Stage 1: Real-Time Event Integration (3 hours)
+
+**Task 1.1: Create useUserManagementRealtime Hook** (1 hour)
+```typescript
+// src/app/admin/users/hooks/useUserManagementRealtime.ts
+export function useUserManagementRealtime() {
+  const context = useUsersContext()
+  const realtime = useAdminRealtime()
+
+  useEffect(() => {
+    // Subscribe to user management events
+    return realtime.subscribeByTypes(
+      ['user-updated', 'user-created', 'user-deleted', 'role-updated', 'permission-changed'],
+      (event) => {
+        // Refresh relevant context data
+        context.refreshUsers()
+      }
+    )
+  }, [realtime, context])
+}
+```
+
+**Task 1.2: Integrate with UserDataContext** (1 hour)
+- Add `realtimeConnected` boolean to context
+- Auto-refresh users on real-time events
+- Debounce rapid successive refreshes
+
+**Task 1.3: Create useModalRealtime Hook** (1 hour)
+```typescript
+// For modal-specific sync
+export function useModalRealtime(entityId: string, entityType: 'user' | 'client' | 'team-member') {
+  // Subscribe to entity-specific updates
+  // Auto-close modal if entity is deleted
+  // Refresh modal data if entity is updated
+}
+```
+
+#### Stage 2: Modal & Tab Integration (2 hours)
+
+**Task 2.1: Integrate with UserProfileDialog** (1 hour)
+- Listen for updates to displayed user
+- Refresh profile data in real-time
+- Show "updated by another user" notification
+
+**Task 2.2: Integrate with Tab Components** (1 hour)
+- ExecutiveDashboardTab listens to user-list changes
+- EntitiesTab listens to client/team-member changes
+- RbacTab listens to role/permission changes
+- Auto-refresh lists on events
+
+#### Stage 3: Optimistic Updates & Fallbacks (1.5-2 hours)
+
+**Task 3.1: Optimistic UI Updates**
+- Update local state immediately
+- Sync with server in background
+- Revert on error
+
+**Task 3.2: Polling Fallback**
+- 30-second polling if SSE unavailable
+- Automatic SSE reconnection
+- User notification on connection status
+
+### Implementation Scope Clarification Needed
+
+Before implementing, clarify:
+
+1. **Event Types to Emit:**
+   - Should `user-created`, `user-updated`, `user-deleted` be emitted?
+   - Should `role-updated`, `permission-changed` be emitted?
+   - Should `settings-updated` be emitted (for user-management settings)?
+
+2. **Sync Targets:**
+   - Same user, different tabs: Yes/No?
+   - Different users, same dashboard: Yes/No?
+   - Both cross-user and cross-tab: Yes?
+
+3. **Modal Behavior:**
+   - Auto-close if data deleted by another user?
+   - Auto-refresh if data updated by another user?
+   - Show "stale" notification if user edits deleted data?
+
+4. **Performance Thresholds:**
+   - Debounce refresh after N milliseconds?
+   - Batch multiple events before refresh?
+   - Disable real-time for users > 5000 items?
+
+### Files to Create/Modify
+
+**New Files to Create:**
+```
+src/app/admin/users/hooks/useUserManagementRealtime.ts (60 lines)
+src/app/admin/users/hooks/useModalRealtime.ts (80 lines)
+src/app/admin/users/hooks/useOptimisticUpdate.ts (100 lines)
+src/app/admin/users/hooks/useRealtimeSync.ts (50 lines)
+```
+
+**Files to Modify:**
+```
+src/app/admin/users/contexts/UserDataContext.tsx
+  - Add realtimeConnected state
+  - Add debounced refresh logic
+
+src/app/admin/users/components/UserProfileDialog/DetailsTab.tsx
+  - Integrate useModalRealtime hook
+
+src/app/admin/users/components/tabs/ExecutiveDashboardTab.tsx
+src/app/admin/users/components/tabs/EntitiesTab.tsx
+src/app/admin/users/components/tabs/RbacTab.tsx
+  - Listen to event types
+  - Auto-refresh on events
+```
+
+### Environment Configuration
+
+**Already Available:**
+- `REALTIME_TRANSPORT` - "postgres" or "memory" (default)
+- `REALTIME_PG_URL` - PostgreSQL connection URL
+- `REALTIME_PG_CHANNEL` - LISTEN/NOTIFY channel name (default: "app_events")
+
+**No additional configuration needed**
+
+### Risk Assessment
+
+| Area | Risk | Mitigation |
+|------|------|------------|
+| SSE Connection | Low | Already in use in other parts of codebase |
+| Event Deduplication | Low | RealtimeService handles it |
+| Performance Impact | Medium | Debounce & batch events |
+| Fallback Handling | Low | SSE → Polling fallback pattern exists |
+| Breaking Changes | Very Low | Additive only, no changes to existing APIs |
+
+### Timeline Estimate
+
+- **Stage 1 (Integration):** 3 hours
+- **Stage 2 (Modal/Tab):** 2 hours
+- **Stage 3 (Optimistic):** 1.5-2 hours
+- **Testing & Fixes:** 1-2 hours
+- **Total:** 7-9 hours
+
+### Next Phase Recommendations
+
+**Upon approval of Phase 2.3 scope:**
+1. Clarify event types and sync behavior requirements
+2. Implement useUserManagementRealtime hook
+3. Integrate with UserDataContext
+4. Add real-time event emission to API routes
+5. Test with E2E suite
+
+**Phase 3 (Proposed):** Testing & Advanced Features
+- Virtual scrolling with real-time updates
+- Conflict resolution for concurrent edits
+- Advanced filtering with streaming updates
+
+---
