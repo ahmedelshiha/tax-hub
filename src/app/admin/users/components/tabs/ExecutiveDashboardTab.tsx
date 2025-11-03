@@ -238,16 +238,18 @@ export function ExecutiveDashboardTab({
               <h2 className="text-lg font-semibold text-gray-900 mb-4">User Directory</h2>
               <AdvancedUserFilters
                 filters={filters}
-                onFiltersChange={setFilters}
-                onReset={() =>
-                  setFilters({
+                onFiltersChange={handleFilterChange}
+                onReset={() => {
+                  const resetFilters: UserFilters = {
                     search: '',
                     role: undefined,
                     status: undefined,
                     department: undefined,
                     dateRange: 'all'
-                  })
-                }
+                  }
+                  setFiltersUI(resetFilters)
+                  setFilters({})
+                }}
               />
             </section>
 
@@ -256,7 +258,16 @@ export function ExecutiveDashboardTab({
               <div className="mb-4 flex flex-col gap-4 flex-1">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="text-sm text-gray-600">
-                    Showing {filteredUsers.length} of {users.length} users
+                    {filterLoading ? (
+                      'Loading...'
+                    ) : (
+                      <>
+                        Showing {filteredUsers.length} of {totalCount || users.length} users
+                        {currentPage > 0 && totalPages > 0 && (
+                          <span className="ml-2 text-gray-500">(Page {currentPage} of {totalPages})</span>
+                        )}
+                      </>
+                    )}
                     {selectedUserIds.size > 0 && (
                       <span className="ml-2 font-semibold text-blue-600" role="status" aria-live="polite">
                         ({selectedUserIds.size} selected)
