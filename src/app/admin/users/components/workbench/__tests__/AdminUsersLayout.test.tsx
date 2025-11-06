@@ -46,7 +46,7 @@ describe('AdminUsersLayout', () => {
     })
 
     it('should render main content area', () => {
-      render(<AdminUsersLayout />)
+      renderWithContext(<AdminUsersLayout />)
 
       // Check for main content area
       const main = screen.getByRole('main')
