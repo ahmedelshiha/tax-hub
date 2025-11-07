@@ -6,7 +6,7 @@ import OverviewCards from '../OverviewCards'
 // Mock the useUsersContext hook
 const mockUseUsersContext = vi.fn()
 
-vi.mock('../../contexts/UsersContextProvider', () => ({
+vi.mock('../../../contexts/UsersContextProvider', () => ({
   useUsersContext: mockUseUsersContext
 }))
 
