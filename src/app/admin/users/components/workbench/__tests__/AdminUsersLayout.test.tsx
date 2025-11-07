@@ -126,8 +126,14 @@ describe('AdminUsersLayout', () => {
 
     it('should have proper ARIA landmarks', () => {
       renderWithContext(<AdminUsersLayout />)
-      expect(screen.getByRole('main')).toBeInTheDocument()
-      expect(screen.getByRole('complementary')).toBeInTheDocument()
+      const header = screen.getByTestId('admin-workbench-header')
+      expect(header).toHaveAttribute('role', 'banner')
+
+      const main = screen.getByTestId('admin-main-content')
+      expect(main.tagName).toBe('MAIN')
+
+      const aside = screen.getByTestId('admin-sidebar')
+      expect(aside.tagName).toBe('ASIDE')
     })
 
     it('should have focusable buttons', () => {
