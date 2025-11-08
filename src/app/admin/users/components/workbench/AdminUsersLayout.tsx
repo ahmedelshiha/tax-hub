@@ -121,9 +121,21 @@ export default function AdminUsersLayout() {
     }
   }
 
-  const handleRefresh = () => {
-    console.log('Refresh clicked')
-    window.location.reload()
+  const handleRefresh = async () => {
+    const toastId = toast.loading('Refreshing data...')
+    try {
+      // Trigger data refresh through context
+      if (context.refreshUsers) {
+        await context.refreshUsers()
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Data refreshed successfully')
+    } catch (error) {
+      console.error('Refresh error:', error)
+      toast.dismiss(toastId)
+      toast.error('Failed to refresh data')
+    }
   }
 
   const handleImportComplete = (results: any) => {
