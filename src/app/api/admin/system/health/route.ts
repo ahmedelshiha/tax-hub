@@ -31,12 +31,12 @@ function measureTime(fn: () => Promise<void>): Promise<number> {
  * Check database connectivity via Prisma
  */
 async function checkDatabase(): Promise<{
-  status: 'operational' | 'degraded' | 'outage'
+  status: 'healthy' | 'degraded' | 'unavailable'
   latency: number
   error?: string
 }> {
   let latency = 0
-  let status: 'operational' | 'degraded' | 'outage' = 'outage'
+  let status: 'healthy' | 'degraded' | 'unavailable' = 'unavailable'
   let error: string | undefined
 
   try {
@@ -45,10 +45,10 @@ async function checkDatabase(): Promise<{
         // Using raw SQL for minimal overhead
         const prisma = (await import('@prisma/client')).PrismaClient
         const client = new prisma()
-        
+
         // Simple connectivity check
         await client.$queryRaw`SELECT 1`
-        
+
         await client.$disconnect()
       } catch (e) {
         throw e
@@ -57,13 +57,13 @@ async function checkDatabase(): Promise<{
 
     // Determine status based on latency
     if (latency < 1000) {
-      status = 'operational'
+      status = 'healthy'
     } else {
       status = 'degraded'
       error = `Database latency high: ${Math.round(latency)}ms`
     }
   } catch (e) {
-    status = 'outage'
+    status = 'unavailable'
     error = e instanceof Error ? e.message : 'Database check failed'
   }
 
@@ -74,7 +74,7 @@ async function checkDatabase(): Promise<{
  * Check Redis connectivity (optional, graceful degradation)
  */
 async function checkRedis(): Promise<{
-  status: 'operational' | 'degraded' | 'outage'
+  status: 'healthy' | 'degraded' | 'unavailable'
   latency: number
   error?: string
 } | null> {
@@ -85,7 +85,7 @@ async function checkRedis(): Promise<{
     }
 
     let latency = 0
-    let status: 'operational' | 'degraded' | 'outage' = 'outage'
+    let status: 'healthy' | 'degraded' | 'unavailable' = 'unavailable'
     let error: string | undefined
 
     latency = await measureTime(async () => {
@@ -98,7 +98,7 @@ async function checkRedis(): Promise<{
 
         try {
           await redis.ping()
-          status = 'operational'
+          status = 'healthy'
         } finally {
           redis.disconnect()
         }
@@ -128,12 +128,12 @@ async function checkRedis(): Promise<{
  * Check API responsiveness
  */
 async function checkAPI(): Promise<{
-  status: 'operational' | 'degraded' | 'outage'
+  status: 'healthy' | 'degraded' | 'unavailable'
   latency: number
   error?: string
 }> {
   let latency = 0
-  let status: 'operational' | 'degraded' | 'outage' = 'operational'
+  let status: 'healthy' | 'degraded' | 'unavailable' = 'healthy'
 
   try {
     latency = await measureTime(async () => {
@@ -142,7 +142,7 @@ async function checkAPI(): Promise<{
       await new Promise(resolve => setTimeout(resolve, 0))
     })
   } catch (e) {
-    status = 'outage'
+    status = 'unavailable'
   }
 
   return { status, latency }
@@ -152,24 +152,24 @@ async function checkAPI(): Promise<{
  * Check email service configuration (SendGrid)
  */
 async function checkEmail(): Promise<{
-  status: 'operational' | 'degraded' | 'outage'
+  status: 'healthy' | 'degraded' | 'unavailable'
   latency: number
   error?: string
 }> {
   let latency = 0
-  let status: 'operational' | 'degraded' | 'outage' = 'operational'
+  let status: 'healthy' | 'degraded' | 'unavailable' = 'healthy'
   let error: string | undefined
 
   try {
     latency = await measureTime(async () => {
       const hasConfig = Boolean(process.env.SENDGRID_API_KEY)
       if (!hasConfig) {
-        status = 'outage'
+        status = 'unavailable'
         error = 'SendGrid API key not configured'
       }
     })
   } catch (e) {
-    status = 'outage'
+    status = 'unavailable'
     error = e instanceof Error ? e.message : 'Email service check failed'
   }
 
@@ -180,12 +180,12 @@ async function checkEmail(): Promise<{
  * Check authentication service configuration (NextAuth)
  */
 async function checkAuth(): Promise<{
-  status: 'operational' | 'degraded' | 'outage'
+  status: 'healthy' | 'degraded' | 'unavailable'
   latency: number
   error?: string
 }> {
   let latency = 0
-  let status: 'operational' | 'degraded' | 'outage' = 'operational'
+  let status: 'healthy' | 'degraded' | 'unavailable' = 'healthy'
   let error: string | undefined
 
   try {
@@ -194,7 +194,7 @@ async function checkAuth(): Promise<{
       const hasUrl = Boolean(process.env.NEXTAUTH_URL)
 
       if (!hasSecret || !hasUrl) {
-        status = 'outage'
+        status = 'unavailable'
         const missing = []
         if (!hasSecret) missing.push('NEXTAUTH_SECRET')
         if (!hasUrl) missing.push('NEXTAUTH_URL')
@@ -202,7 +202,7 @@ async function checkAuth(): Promise<{
       }
     })
   } catch (e) {
-    status = 'outage'
+    status = 'unavailable'
     error = e instanceof Error ? e.message : 'Auth service check failed'
   }
 
@@ -256,8 +256,8 @@ export async function GET(): Promise<NextResponse<SystemHealthResponse>> {
     // Critical services: database, api
     // Non-critical services: redis
     const criticalIssues = [
-      databaseCheck.status === 'outage',
-      apiCheck.status === 'outage',
+      databaseCheck.status === 'unavailable',
+      apiCheck.status === 'unavailable',
     ].some(Boolean)
 
     const anyDegraded = [
@@ -266,14 +266,14 @@ export async function GET(): Promise<NextResponse<SystemHealthResponse>> {
       redisCheck?.status === 'degraded',
     ].some(Boolean)
 
-    let overallStatus: 'operational' | 'degraded' | 'outage' = 'operational'
+    let overallStatus: 'healthy' | 'degraded' | 'unavailable' = 'healthy'
     let message = 'All systems operational'
 
     if (criticalIssues) {
-      overallStatus = 'outage'
+      overallStatus = 'unavailable'
       const failedServices = []
-      if (databaseCheck.status === 'outage') failedServices.push('database')
-      if (apiCheck.status === 'outage') failedServices.push('API')
+      if (databaseCheck.status === 'unavailable') failedServices.push('database')
+      if (apiCheck.status === 'unavailable') failedServices.push('API')
       message = `Service unavailable: ${failedServices.join(', ')}`
     } else if (anyDegraded) {
       overallStatus = 'degraded'
@@ -304,10 +304,10 @@ export async function GET(): Promise<NextResponse<SystemHealthResponse>> {
   } catch (error) {
     // Handle unexpected errors gracefully
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    
+
     // Return graceful error response
     const response: SystemHealthResponse = {
-      status: 'outage',
+      status: 'unavailable',
       message: 'Unable to determine system status',
       checks: {
         database: {

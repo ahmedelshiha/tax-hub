@@ -29,7 +29,7 @@ export function HealthDetailModal({
   isRefreshing = false,
 }: HealthDetailModalProps) {
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true)
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState<number | null>(null)
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState<NodeJS.Timeout | null>(null)
 
   // Setup auto-refresh interval
   useEffect(() => {
@@ -55,9 +55,9 @@ export function HealthDetailModal({
   if (!health) return null
 
   const statusIcon = {
-    operational: <CheckCircle2 className="w-6 h-6 text-green-600" />,
+    healthy: <CheckCircle2 className="w-6 h-6 text-green-600" />,
     degraded: <AlertTriangle className="w-6 h-6 text-yellow-600" />,
-    outage: <XCircle className="w-6 h-6 text-red-600" />,
+    unavailable: <XCircle className="w-6 h-6 text-red-600" />,
     unknown: <Clock className="w-6 h-6 text-gray-600" />,
   }[health.status]
 
@@ -73,11 +73,11 @@ export function HealthDetailModal({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'operational':
+      case 'healthy':
         return 'bg-green-100 text-green-800 border-green-300'
       case 'degraded':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300'
-      case 'outage':
+      case 'unavailable':
         return 'bg-red-100 text-red-800 border-red-300'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300'

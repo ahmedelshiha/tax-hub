@@ -19,7 +19,7 @@ import { STATUS_MESSAGES } from './constants'
  * Color mapping for status indicators
  */
 const STATUS_COLORS = {
-  operational: {
+  healthy: {
     dot: 'bg-green-500',
     pulse: 'animate-pulse',
     badge: 'bg-green-100 text-green-800',
@@ -29,7 +29,7 @@ const STATUS_COLORS = {
     pulse: 'animate-pulse',
     badge: 'bg-yellow-100 text-yellow-800',
   },
-  outage: {
+  unavailable: {
     dot: 'bg-red-500',
     pulse: 'animate-pulse',
     badge: 'bg-red-100 text-red-800',
@@ -39,14 +39,6 @@ const STATUS_COLORS = {
     pulse: '',
     badge: 'bg-gray-100 text-gray-800',
   },
-}
-
-export interface SystemStatusProps {
-  health?: any
-  loading?: boolean
-  error?: Error | null
-  compact?: boolean
-  onClick?: () => void
 }
 
 export function SystemStatus({
@@ -112,7 +104,7 @@ export function SystemStatus({
       >
         <div
           className={`h-2 w-2 rounded-full ${colors.dot} ${
-            statusData.status === 'operational' ? colors.pulse : ''
+            statusData.status === 'healthy' ? colors.pulse : ''
           }`}
           aria-hidden="true"
         />
@@ -136,7 +128,7 @@ export function SystemStatus({
       <div className="flex items-center gap-2">
         <div
           className={`h-2.5 w-2.5 rounded-full ${colors.dot} ${
-            statusData.status === 'operational' ? colors.pulse : ''
+            statusData.status === 'healthy' ? colors.pulse : ''
           }`}
           aria-hidden="true"
         />
