@@ -34,6 +34,30 @@ Removed legacy ExecutiveDashboardTab components as they have been fully replaced
    - Only used by the deleted wrapper component
    - No longer needed as AdminWorkBench is now the default
 
+## Feature Flags Simplified
+
+### Changes to `src/lib/admin/featureFlags.ts`
+The feature flag functions have been simplified to always return `true`:
+
+**Before:**
+- `isAdminWorkBenchEnabled()` - Checked `NEXT_PUBLIC_ADMIN_WORKBENCH_ENABLED` env var
+- `isAdminWorkBenchEnabledForUser()` - Implemented gradual rollout (percentage-based)
+- Supported beta tester lists and role-based targeting
+
+**After:**
+- `isAdminWorkBenchEnabled()` - Always returns `true`
+- `isAdminWorkBenchEnabledForUser()` - Always returns `true`
+- `getAdminWorkBenchFeatureFlagConfig()` - Returns production defaults (100% rollout, all users)
+- No environment variable checks needed
+
+**Environment Variables No Longer Required:**
+- ❌ `NEXT_PUBLIC_ADMIN_WORKBENCH_ENABLED`
+- ❌ `NEXT_PUBLIC_ADMIN_WORKBENCH_ROLLOUT_PERCENTAGE`
+- ❌ `NEXT_PUBLIC_ADMIN_WORKBENCH_TARGET_USERS`
+- ❌ `NEXT_PUBLIC_ADMIN_WORKBENCH_BETA_TESTERS`
+
+The feature flag infrastructure is retained for potential use with other features in the future.
+
 ---
 
 ## Files Updated
