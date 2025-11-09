@@ -2,10 +2,8 @@
 
 import React, { memo, useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Shield, Lock, LogOut, Bell, Trash2, Pause, Eye } from 'lucide-react'
+import { Lock, LogOut, Bell, Trash2, Pause, Eye } from 'lucide-react'
 import { UserItem } from '../../contexts/UsersContextProvider'
-import { useUsersContext } from '../../contexts/UsersContextProvider'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -24,13 +22,8 @@ interface SettingsTabProps {
 }
 
 export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps) {
-  const { setPermissionModalOpen, permissionModalOpen, permissionsSaving } = useUsersContext()
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-  const handleManagePermissions = useCallback(() => {
-    setPermissionModalOpen(true)
-  }, [setPermissionModalOpen])
 
   const [isDeactivating, setIsDeactivating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
