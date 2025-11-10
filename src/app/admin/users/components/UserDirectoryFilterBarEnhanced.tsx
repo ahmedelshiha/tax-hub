@@ -143,8 +143,11 @@ export function UserDirectoryFilterBarEnhanced({
             placeholder="Search name, email, phone..."
             value={filters.search}
             onChange={handleSearchChange}
+            onFocus={() => setSuggestionsOpen(!!filters.search)}
+            onBlur={() => setTimeout(() => setSuggestionsOpen(false), 200)}
             className="w-full text-sm pl-3 pr-8"
             aria-label="Search users by name, email, or phone"
+            autoComplete="off"
           />
           {filters.search && (
             <button
@@ -156,6 +159,13 @@ export function UserDirectoryFilterBarEnhanced({
               <X className="w-4 h-4" />
             </button>
           )}
+          <SearchSuggestionsDropdown
+            suggestions={suggestions}
+            isLoading={isLoading}
+            isOpen={suggestionsOpen && (suggestions.length > 0 || isLoading)}
+            onSelectSuggestion={handleSuggestionSelect}
+            searchQuery={filters.search}
+          />
         </div>
 
         {/* Multi-select role filter */}
