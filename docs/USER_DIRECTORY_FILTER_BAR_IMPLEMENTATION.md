@@ -396,6 +396,8 @@ See: [PHASE_7_ADVANCED_QUERY_BUILDER.md](./PHASE_7_ADVANCED_QUERY_BUILDER.md)
 
 ---
 
+## ⏳ PENDING PHASES (13-20)
+
 ### Phase 13: Advanced Export with Formatting (v2.5)
 **Status:** Pending  
 **Estimated Effort:** 3-4 hours  
