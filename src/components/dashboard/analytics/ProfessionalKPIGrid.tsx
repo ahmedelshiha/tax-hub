@@ -183,7 +183,7 @@ export default function ProfessionalKPIGrid({ stats }: KPIStatsProps) {
                         />
                       </div>
                       {'targetValue' in kpi && kpi.targetValue && (
-                        <div className="text-2xs text-gray-500">Target: {kpi.targetValue}</div>
+                        <div className="text-xs text-gray-500">Target: {kpi.targetValue}</div>
                       )}
                     </div>
                   )}
