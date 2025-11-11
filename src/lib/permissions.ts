@@ -98,6 +98,16 @@ export const PERMISSIONS = {
   // Language management
   LANGUAGES_VIEW: 'languages.view',
   LANGUAGES_MANAGE: 'languages.manage',
+
+  // Reports management
+  REPORTS_CREATE: 'reports.create',
+  REPORTS_READ: 'reports.read',
+  REPORTS_WRITE: 'reports.write',
+  REPORTS_DELETE: 'reports.delete',
+  REPORTS_GENERATE: 'reports.generate',
+
+  // Advanced exports
+  USERS_EXPORT: 'users.export',
 } as const
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
