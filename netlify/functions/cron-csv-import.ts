@@ -17,7 +17,7 @@ const csvImportHandler = async (req: any) => {
     }
 
     let processedCount = 0;
-    let maxIterations = 10; // Process up to 10 jobs per cron run
+    const maxIterations = 10; // Process up to 10 jobs per cron run
 
     // Process queued import jobs
     while (processedCount < maxIterations) {

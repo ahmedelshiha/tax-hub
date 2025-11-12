@@ -30,7 +30,7 @@ const _api_GET = async (request: NextRequest) => {
     }
 
     // If entityId provided, verify it belongs to tenant
-    let query: any = { tenantId: ctx.tenantId };
+    const query: any = { tenantId: ctx.tenantId };
     if (entityId) {
       const entity = await prisma.entity.findUnique({
         where: { id: entityId },

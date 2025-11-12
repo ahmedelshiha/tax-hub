@@ -324,7 +324,7 @@ test.describe("Business Setup Wizard", () => {
       await page.keyboard.press("Tab");
       
       // Input should be focused
-      let focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+      const focusedElement = await page.evaluate(() => document.activeElement?.tagName);
       expect(["INPUT", "SELECT"]).toContain(focusedElement);
     });
 
