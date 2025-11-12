@@ -6,7 +6,6 @@ import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, ChevronRight, AlertCircle } from "lucide-react";
-import DataTable from "@/components/dashboard/DataTable";
 import { PermissionGate } from "@/components/PermissionGate";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { logger } from "@/lib/logger";
@@ -68,67 +67,6 @@ export default function EntitiesPage() {
     SUSPENDED: "bg-red-100 text-red-800",
   };
 
-  const columns = [
-    {
-      id: "name",
-      header: "Business Name",
-      cell: (entity: Entity) => (
-        <Link
-          href={`/admin/entities/${entity.id}`}
-          className="font-medium text-blue-600 hover:underline"
-        >
-          {entity.name}
-        </Link>
-      ),
-    },
-    {
-      id: "country",
-      header: "Country",
-      cell: (entity: Entity) => (
-        <span>{countryMap[entity.country] || entity.country}</span>
-      ),
-    },
-    {
-      id: "status",
-      header: "Status",
-      cell: (entity: Entity) => (
-        <span
-          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-            statusColors[entity.status] || "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {entity.status}
-        </span>
-      ),
-    },
-    {
-      id: "legalForm",
-      header: "Legal Form",
-      cell: (entity: Entity) => <span>{entity.legalForm || "—"}</span>,
-    },
-    {
-      id: "createdAt",
-      header: "Created",
-      cell: (entity: Entity) => (
-        <span className="text-gray-600 text-sm">
-          {new Date(entity.createdAt).toLocaleDateString()}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: (entity: Entity) => (
-        <Link
-          href={`/admin/entities/${entity.id}`}
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
-        >
-          View
-          <ChevronRight className="w-4 h-4" />
-        </Link>
-      ),
-    },
-  ];
 
   return (
     <PermissionGate
@@ -212,10 +150,62 @@ export default function EntitiesPage() {
           </div>
         )}
 
-        {/* Data Table */}
+        {/* Entities Table */}
         {!isLoading && entities.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <DataTable columns={columns} data={entities} />
+          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-gray-200 bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Business Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Country</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Legal Form</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {entities.map((entity) => (
+                  <tr key={entity.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/admin/entities/${entity.id}`}
+                        className="font-medium text-blue-600 hover:underline"
+                      >
+                        {entity.name}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {countryMap[entity.country] || entity.country}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                          statusColors[entity.status] || "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {entity.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {entity.legalForm || "—"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {new Date(entity.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/admin/entities/${entity.id}`}
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                      >
+                        View
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
