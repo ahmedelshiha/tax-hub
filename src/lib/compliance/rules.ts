@@ -101,7 +101,8 @@ export function isVATRegistrationRequired(entity: Entity, annualTurnover: number
  */
 export function isESRRequired(entity: Entity): boolean {
   if (entity.country !== 'AE') return false;
-  return entity.type === 'company' || entity.type === 'partnership';
+  const entityType = getEntityType(entity);
+  return entityType === 'company' || entityType === 'partnership';
 }
 
 /**
