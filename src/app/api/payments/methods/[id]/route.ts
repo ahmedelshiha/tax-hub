@@ -24,7 +24,7 @@ export const PATCH = withTenantContext(
       const validated = UpdatePaymentMethodSchema.parse(body)
 
       const paymentMethod = await prisma.userPaymentMethod.findFirst({
-        where: { id, userId, tenantId },
+        where: { id, userId: userId!, tenantId: tenantId! },
       })
 
       if (!paymentMethod) {
@@ -70,7 +70,7 @@ export const DELETE = withTenantContext(
       const { id } = params
 
       const paymentMethod = await prisma.userPaymentMethod.findFirst({
-        where: { id, userId, tenantId },
+        where: { id, userId: userId!, tenantId: tenantId! },
       })
 
       if (!paymentMethod) {
