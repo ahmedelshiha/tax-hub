@@ -102,7 +102,8 @@ export function isVATRegistrationRequired(entity: Entity, annualTurnover: number
  * Applies to companies with significant UAE-source income
  */
 export function isESRRequired(entity: Entity): boolean {
-  if (entity.country !== 'AE') return false;
+  const country = entity.country as CountryCode;
+  if (country !== 'AE') return false;
   const entityType = getEntityType(entity);
   return entityType === 'company' || entityType === 'partnership';
 }
@@ -112,7 +113,8 @@ export function isESRRequired(entity: Entity): boolean {
  * Annual update requirement for all registered entities
  */
 export function isUBORegisterRequired(entity: Entity): boolean {
-  if (entity.country !== 'AE') return false;
+  const country = entity.country as CountryCode;
+  if (country !== 'AE') return false;
   return true; // Required for all entities
 }
 
@@ -121,7 +123,8 @@ export function isUBORegisterRequired(entity: Entity): boolean {
  * 2.5% of net assets for Saudi entities
  */
 export function isZakatRequired(entity: Entity): boolean {
-  if (entity.country !== 'SA') return false;
+  const country = entity.country as CountryCode;
+  if (country !== 'SA') return false;
   // Zakat is mandatory for all Saudi entities with net assets > SAR 25,000
   return true;
 }
@@ -132,10 +135,11 @@ export function isZakatRequired(entity: Entity): boolean {
  * - Egypt: Various rates (5-10%) on specific transactions
  */
 export function isWHTRequired(entity: Entity, transactionType?: string): boolean {
-  if (entity.country === 'SA') {
+  const country = entity.country as CountryCode;
+  if (country === 'SA') {
     return true; // KSA requires WHT reporting
   }
-  if (entity.country === 'EG') {
+  if (country === 'EG') {
     return true; // Egypt requires WHT reporting
   }
   return false;
@@ -147,11 +151,12 @@ export function isWHTRequired(entity: Entity, transactionType?: string): boolean
  * - Egypt: Mandatory for all B2B transactions > EGP 2,000
  */
 export function isEInvoicingRequired(entity: Entity, transactionAmount?: number): boolean {
-  if (entity.country === 'SA') {
+  const country = entity.country as CountryCode;
+  if (country === 'SA') {
     // Mandatory for large taxpayers
     return true;
   }
-  if (entity.country === 'EG') {
+  if (country === 'EG') {
     // Mandatory for B2B transactions > EGP 2,000
     return transactionAmount ? transactionAmount > 2000 : true;
   }
