@@ -255,7 +255,7 @@ export async function getAvailabilityForService(params: {
       businessHours = normalizeBusinessHours(member.workingHours as any)
     }
   } catch (e) {
-    logger.debug('getAvailabilityForService: normalize member workingHours error', { teamMemberId }, e instanceof Error ? e : undefined)
+    logger.debug('getAvailabilityForService: normalize member workingHours error', { teamMemberId, error: e instanceof Error ? e.message : String(e) })
     businessHours = undefined
   }
   if (!businessHours) {
