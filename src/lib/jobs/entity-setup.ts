@@ -69,6 +69,7 @@ export async function getVerificationState(
   entityId: string
 ): Promise<VerificationJobState | null> {
   try {
+    const redis = getRedisClient();
     const key = `${JOB_STATE_PREFIX}${entityId}`;
     const state = await redis.get(key);
     return state ? JSON.parse(state as string) : null;
