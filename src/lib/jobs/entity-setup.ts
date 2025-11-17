@@ -132,12 +132,13 @@ export async function updateVerificationState(
       startedAt: current.startedAt, // Preserve original start time
     };
 
+    const redis = getRedisClient();
     const key = `${JOB_STATE_PREFIX}${entityId}`;
     await redis.set(key, JSON.stringify(updated), { ex: VERIFICATION_TIMEOUT / 1000 });
-    
+
     // Publish update event
     await publishEvent("job.updated", updated);
-    
+
     return updated;
   } catch (error) {
     logger.error("Failed to update verification state", { entityId, error });
