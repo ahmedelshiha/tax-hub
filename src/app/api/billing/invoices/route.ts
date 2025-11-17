@@ -61,8 +61,8 @@ export const GET = withTenantContext(async (request: NextRequest) => {
 
     logger.error('Error fetching invoices', {
       error: errorMsg,
-      userId: ctx.userId,
-      tenantId: ctx.tenantId,
+      userId: ctx?.userId,
+      tenantId: ctx?.tenantId,
     });
 
     console.error('[INVOICES_API_ERROR] GET failed:', {
