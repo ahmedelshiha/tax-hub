@@ -59,7 +59,7 @@ export default function ApprovalCard({
   className = '',
 }: ApprovalCardProps) {
   const { has } = usePermissions()
-  const canDeleteApproval = has('approvals:delete')
+  const canDeleteApproval = has(PERMISSIONS.APPROVALS_DELETE)
 
   if (!approval) return null
 
