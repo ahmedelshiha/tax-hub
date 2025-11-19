@@ -268,6 +268,13 @@ export const DELETE = withTenantContext(
         },
       })
 
+      // Publish real-time event for portal and admin notifications
+      publishBookingDeleted({
+        id: cancelled.id,
+        serviceId: cancelled.serviceId,
+        action: 'deleted',
+      })
+
       return respond.ok({ success: true, message: 'Booking cancelled successfully', data: cancelled })
     } catch (error) {
       logger.error('Failed to cancel booking', { error })
