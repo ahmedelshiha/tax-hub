@@ -77,16 +77,17 @@ export default function ApprovalCard({
   // Compact variant
   if (variant === 'compact') {
     const requestedDate = approval.requestedAt ? new Date(approval.requestedAt) : null
+    const title = `${approval.itemType} Approval` + (approval.requesterName ? ` by ${approval.requesterName}` : '')
     return (
       <div
         className={`flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 transition-colors cursor-pointer ${className}`}
         onClick={onClick}
         role="button"
         tabIndex={0}
-        aria-label={`Approval request: ${approval.title}`}
+        aria-label={title}
       >
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm truncate">{approval.title}</p>
+          <p className="font-medium text-sm truncate">{title}</p>
           {requestedDate && (
             <p className="text-xs text-gray-500">
               Requested {formatRelativeTime(requestedDate)}
