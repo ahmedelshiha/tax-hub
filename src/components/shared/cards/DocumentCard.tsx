@@ -199,7 +199,7 @@ export default function DocumentCard({
             <div>
               <p className="text-xs font-medium text-gray-500">Uploaded</p>
               <p>
-                {formatDate(uploadedDate, 'full')} ({formatRelativeTime(uploadedDate)})
+                {formatDate(uploadedDate, 'long')} ({formatRelativeTime(uploadedDate)})
               </p>
             </div>
           )}
