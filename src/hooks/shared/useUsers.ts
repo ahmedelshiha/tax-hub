@@ -73,4 +73,12 @@ export function useUsers(
   }
 }
 
+/**
+ * Fetch all users for admin dashboards and team selection
+ * Uses sensible defaults for pagination
+ */
+export function useUsersData(filters: UserFilters = {}) {
+  return useUsers({ ...filters, limit: filters.limit || 50 })
+}
+
 export default useUsers

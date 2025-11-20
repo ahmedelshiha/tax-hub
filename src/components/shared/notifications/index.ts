@@ -4,3 +4,4 @@
  */
 
 export { default as NotificationBanner } from './NotificationBanner'
+export { default as TaskNotification } from './TaskNotification'

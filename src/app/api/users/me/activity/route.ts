@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAdminAuth } from '@/lib/api-wrapper'
+import { withTenantContext } from '@/lib/api-wrapper'
 import { respond } from '@/lib/api-response'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
@@ -7,32 +7,52 @@ import { z } from 'zod'
 const FilterSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
+  action: z.string().optional(),
+  entity: z.string().optional(),
+  dateFrom: z.string().datetime().optional(),
+  dateTo: z.string().datetime().optional(),
 })
 
 /**
- * GET /api/admin/users/[id]/activity
- * Get user's activity log (admin view)
+ * GET /api/users/me/activity
+ * Get current user's activity log
+ *
+ * Query Parameters:
+ * - limit: Number of records (default 20, max 100)
+ * - offset: Pagination offset (default 0)
+ * - action: Filter by action type (e.g., TASK_CREATED, PROFILE_UPDATED)
+ * - entity: Filter by entity type (e.g., Task, User, Service)
+ * - dateFrom: Start date for activity
+ * - dateTo: End date for activity
  */
-export const GET = withAdminAuth(
-  async (request, { user, tenantId }, { params }) => {
+export const GET = withTenantContext(
+  async (request, { user, tenantId }) => {
     try {
-      const { id } = params
       const { searchParams } = new URL(request.url)
       const filters = FilterSchema.parse(Object.fromEntries(searchParams))
 
-      // Verify user exists and belongs to tenant
-      const userExists = await prisma.user.findFirst({
-        where: { id, tenantId },
-      })
-
-      if (!userExists) {
-        return respond.notFound('User not found')
-      }
-
       // Build query
       const where: any = {
-        userId: id,
+        userId: user.id,
         tenantId,
+      }
+
+      if (filters.action) {
+        where.action = filters.action
+      }
+
+      if (filters.entity) {
+        where.entity = filters.entity
+      }
+
+      if (filters.dateFrom || filters.dateTo) {
+        where.createdAt = {}
+        if (filters.dateFrom) {
+          where.createdAt.gte = new Date(filters.dateFrom)
+        }
+        if (filters.dateTo) {
+          where.createdAt.lte = new Date(filters.dateTo)
+        }
       }
 
       // Get total count
@@ -49,6 +69,7 @@ export const GET = withAdminAuth(
           changes: true,
           details: true,
           createdAt: true,
+          updatedAt: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -70,7 +91,7 @@ export const GET = withAdminAuth(
       if (error instanceof z.ZodError) {
         return respond.badRequest('Invalid filters', error.errors)
       }
-      console.error('Get user activity error:', error)
+      console.error('Get activity error:', error)
       return respond.serverError()
     }
   },

@@ -81,4 +81,34 @@ export function useTasks(
   }
 }
 
+/**
+ * Fetch all tasks for admin dashboard or portal user tasks
+ * Uses sensible defaults for pagination and sorting
+ */
+export function useTasksData(filters: TaskFilters = {}) {
+  return useTasks({ ...filters, assignedToMe: false, limit: filters.limit || 50 })
+}
+
+/**
+ * Fetch a single task with full details including comments
+ */
+export function useTaskDetail(taskId: string) {
+  const { data, error, isLoading, mutate } = useSWR(
+    `/api/tasks/${taskId}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30000,
+    }
+  )
+
+  return {
+    task: data?.data || null,
+    comments: data?.data?.comments || [],
+    error,
+    isLoading: !data && !error,
+    mutate,
+  }
+}
+
 export default useTasks
