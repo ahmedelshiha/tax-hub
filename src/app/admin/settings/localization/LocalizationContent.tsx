@@ -298,9 +298,10 @@ export default function LocalizationContent() {
       toast.success('Organization settings saved')
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch (e: any) {
-      setError(e?.message || 'Failed to save organization settings')
-      toast.error(e?.message || 'Failed to save settings')
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e.message : String(e)
+      setError(error || 'Failed to save organization settings')
+      toast.error(error || 'Failed to save settings')
     } finally {
       setSaving(false)
     }
@@ -333,9 +334,10 @@ export default function LocalizationContent() {
       setSaved(true)
       setRegionalFormatsEdited(false)
       setTimeout(() => setSaved(false), 3000)
-    } catch (e: any) {
-      setError(e?.message || 'Failed to save regional formats')
-      toast.error(e?.message || 'Failed to save formats')
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e.message : String(e)
+      setError(error || 'Failed to save regional formats')
+      toast.error(error || 'Failed to save formats')
     } finally {
       setSaving(false)
     }
@@ -356,9 +358,10 @@ export default function LocalizationContent() {
       setSaved(true)
       await loadCrowdinIntegration()
       setTimeout(() => setSaved(false), 3000)
-    } catch (e: any) {
-      setError(e?.message || 'Failed to save Crowdin integration')
-      toast.error(e?.message || 'Failed to save integration')
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e.message : String(e)
+      setError(error || 'Failed to save Crowdin integration')
+      toast.error(error || 'Failed to save integration')
     } finally {
       setSaving(false)
     }
@@ -380,8 +383,8 @@ export default function LocalizationContent() {
       if (!r.ok) throw new Error(d?.error || 'Connection test failed')
       setCrowdinTestResult({ success: true, message: 'Connection successful!' })
       toast.success('Crowdin connection test passed')
-    } catch (e: any) {
-      const message = e?.message || 'Connection test failed'
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Connection test failed'
       setCrowdinTestResult({ success: false, message })
       toast.error(message)
     } finally {
