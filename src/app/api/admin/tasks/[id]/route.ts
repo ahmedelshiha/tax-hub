@@ -80,7 +80,7 @@ export const GET = withTenantContext(
       return respond.serverError()
     }
   },
-  { requireAuth: true, requireAdmin: true }
+  { requireAuth: true }
 )
 
 /**
@@ -88,10 +88,13 @@ export const GET = withTenantContext(
  * Update a task (admin only)
  */
 export const PUT = withTenantContext(
-  async (request, { user, tenantId }, { params }) => {
+  async (request, { params }) => {
     try {
+      const ctx = requireTenantContext()
+      const { tenantId, userId, role, tenantRole } = ctx
+
       // Verify admin access
-      if (!user.isAdmin) {
+      if (role !== 'SUPER_ADMIN' && !tenantRole?.includes('ADMIN')) {
         return respond.forbidden('Only administrators can update tasks')
       }
 
