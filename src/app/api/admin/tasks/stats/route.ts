@@ -10,9 +10,12 @@ import { TaskStatus, TaskPriority } from '@/types/shared/entities/task'
  * Get task statistics for dashboard (admin only)
  */
 export const GET = withTenantContext(
-  async (request, { user, tenantId }) => {
+  async (request, { params }) => {
     try {
-      if (!user.isAdmin) {
+      const ctx = requireTenantContext()
+      const { tenantId } = ctx
+
+      if (ctx.role !== 'SUPER_ADMIN' && !ctx.tenantRole?.includes('ADMIN')) {
         return respond.forbidden('Only administrators can access this endpoint')
       }
 
