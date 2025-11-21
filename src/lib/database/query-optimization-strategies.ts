@@ -5,7 +5,7 @@
  * Prevents N+1 problems, excessive data loading, and slow queries
  */
 
-import { prisma } from './prisma'
+import prisma from '../prisma'
 
 /**
  * STRATEGY 1: Select Optimization
@@ -75,8 +75,8 @@ export const selectOptimization = {
     serviceId: true,
     clientId: true,
     status: true,
-    startTime: true,
-    endTime: true,
+    scheduledAt: true,
+    duration: true,
     amount: true,
     createdAt: true,
   },
@@ -89,13 +89,12 @@ export const selectOptimization = {
     serviceId: true,
     clientId: true,
     status: true,
-    startTime: true,
-    endTime: true,
+    scheduledAt: true,
+    duration: true,
     amount: true,
     notes: true,
     createdAt: true,
     updatedAt: true,
-    confirmedAt: true,
     completedAt: true,
   },
 
@@ -105,11 +104,10 @@ export const selectOptimization = {
   documentList: {
     id: true,
     name: true,
-    type: true,
+    contentType: true,
     size: true,
-    status: true,
     uploadedAt: true,
-    uploadedBy: true,
+    uploaderId: true,
   },
 
   /**
