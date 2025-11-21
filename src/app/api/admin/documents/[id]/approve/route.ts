@@ -100,8 +100,7 @@ export const POST = withAdminAuth(async (request, context) => {
         action: approved ? 'admin:documents_approve' : 'admin:documents_reject',
         userId,
         resource: 'Document',
-        resourceId: document.id,
-        details: {
+        metadata: {
           documentName: document.name,
           approvedBy: userId,
           approved,

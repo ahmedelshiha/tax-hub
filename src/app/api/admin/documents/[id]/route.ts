@@ -117,8 +117,7 @@ export const DELETE = withAdminAuth(async (request, context) => {
         action: 'admin:documents_delete',
         userId,
         resource: 'Document',
-        resourceId: document.id,
-        details: {
+        metadata: {
           documentName: document.name,
           documentSize: document.size,
           deletedBy: userId,

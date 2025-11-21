@@ -46,7 +46,7 @@ export const POST = withAdminAuth(async (request, context) => {
         avStatus: 'pending',
         avScanAt: new Date(),
         metadata: {
-          ...document.metadata,
+          ...(typeof document.metadata === 'object' && document.metadata !== null ? document.metadata : {}),
           scanRequested: {
             by: userId,
             at: new Date().toISOString(),
@@ -63,8 +63,7 @@ export const POST = withAdminAuth(async (request, context) => {
         action: 'admin:documents_scan',
         userId,
         resource: 'Document',
-        resourceId: document.id,
-        details: {
+        metadata: {
           documentName: document.name,
           previousStatus: document.avStatus,
           force,
