@@ -202,7 +202,7 @@ export const POST = withTenantContext(
             assignedTeamMemberId && (ctx.role === 'ADMIN' || ctx.role === 'TEAM_LEAD')
               ? assignedTeamMemberId
               : undefined,
-          createdBy: ctx.userId,
+          createdById: ctx.userId,
         },
         include: {
           service: { select: { id: true, name: true, slug: true } },
