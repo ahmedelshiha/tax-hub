@@ -573,7 +573,11 @@ model Booking {
   assignedTeamMemberId String?
   serviceRequestId     String?
   createdById          String?         // User who created the booking
+  completedAt          DateTime?
+  amount               Decimal?
+  rating               Int?
   workOrders           WorkOrder[]
+  tasks                Task[]
   assignedTeamMember   TeamMember?     @relation(fields: [assignedTeamMemberId], references: [id])
   client               User            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdBy            User?           @relation("BookingCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
