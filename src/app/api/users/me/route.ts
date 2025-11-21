@@ -101,11 +101,11 @@ export const PUT = withTenantContext(
 
       // Log audit event
       await logAudit({
-        tenantId,
-        userId: user.id,
+        tenantId: ctx.tenantId,
+        userId: ctx.userId,
         action: 'PROFILE_UPDATED',
         entity: 'User',
-        entityId: user.id,
+        entityId: ctx.userId,
         changes: input,
       })
 
