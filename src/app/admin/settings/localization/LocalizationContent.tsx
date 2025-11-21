@@ -417,7 +417,7 @@ export default function LocalizationContent() {
       setShowAddLanguageForm(false)
       await loadLanguages()
       toast.success('Language added successfully')
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e?.message || 'Failed to create language')
       toast.error(e?.message || 'Failed to create language')
     } finally {
@@ -445,7 +445,7 @@ export default function LocalizationContent() {
       })
       await loadLanguages()
       toast.success('Language updated')
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e?.message || 'Failed to update language')
       toast.error(e?.message || 'Failed to update language')
     } finally {
@@ -464,7 +464,7 @@ export default function LocalizationContent() {
       if (!r.ok) throw new Error(d?.error || 'Failed to toggle language')
       await loadLanguages()
       toast.success('Language status updated')
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e?.message)
       toast.error(e?.message)
     } finally {
@@ -486,7 +486,7 @@ export default function LocalizationContent() {
       }
       await loadLanguages()
       toast.success('Language deleted')
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e?.message)
       toast.error(e?.message)
     } finally {
