@@ -49,9 +49,7 @@ export const GET = withAdminAuth(
           id: true,
           action: true,
           resource: true,
-          entityId: true,
-          changes: true,
-          details: true,
+          metadata: true,
           createdAt: true,
         },
         orderBy: {
