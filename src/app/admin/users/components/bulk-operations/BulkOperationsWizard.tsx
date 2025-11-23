@@ -24,11 +24,11 @@ export interface WizardState {
   step: 1 | 2 | 3 | 4 | 5 | 6
   selectedUserIds: string[]
   operationType: string
-  operationConfig: Record<string, any>
-  userFilter: Record<string, any>
+  operationConfig: Record<string, unknown>
+  userFilter: Record<string, unknown>
   operationId?: string
-  dryRunResults?: any
-  executionProgress?: any
+  dryRunResults?: unknown
+  executionProgress?: unknown
   executionResult?: BulkOperationResult
 }
 

@@ -15,11 +15,11 @@ const mockUser = {
 }
 
 describe('UserRow actions', () => {
-  let onViewProfile: any
-  let onEditInline: any
-  let onDeleteUser: any
-  let onResetPassword: any
-  let onRoleChange: any
+  let onViewProfile: ReturnType<typeof vi.fn>
+  let onEditInline: ReturnType<typeof vi.fn>
+  let onDeleteUser: ReturnType<typeof vi.fn>
+  let onResetPassword: ReturnType<typeof vi.fn>
+  let onRoleChange: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     onViewProfile = vi.fn()

@@ -384,9 +384,9 @@ function useBookings() {
         const data = await res.json().catch(() => ({}))
         const bookings = Array.isArray(data) ? data : (data?.bookings || [])
         const mapped: BookingItem[] = bookings.map((b: Record<string, unknown>) => ({
-          id: b.id,
-          clientName: b.client?.name || b.clientName || 'Unknown',
-          service: b.service?.name || b.serviceName || 'Service',
+          id: String(b.id ?? ''),
+          clientName: (b.client as any)?.name || (b.clientName as string) || 'Unknown',
+          service: (b.service as any)?.name || (b.serviceName as string) || 'Service',
           date: (b.scheduledAt ? String(b.scheduledAt) : new Date().toISOString()).slice(0,10),
         }))
         setItems(mapped)
@@ -523,9 +523,14 @@ function NewTaskInner() {
   const onSave = async (task: CreateTaskData) => {
     const result = await createTask({
       title: task.title,
-      priority: (() => { const p = String(task.priority).toLowerCase(); if (p === 'low') return 'low'; if (p === 'high' || p === 'critical') return 'high'; return 'medium' })(),
-      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined,
+      priority: (() => { const p = String(task.priority).toLowerCase(); if (p === 'low') return 'low'; if (p === 'high' || p === 'critical') return 'high'; return 'medium' })() as any,
+      category: task.category ? (task.category.toLowerCase().replace(/\s+/g, '_') as any) : 'system',
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : new Date().toISOString(),
+      estimatedHours: task.estimatedHours || 0,
       assigneeId: task.assigneeId || undefined,
+      tags: task.tags || [],
+      complianceRequired: task.complianceRequired || false,
+      complianceDeadline: task.complianceDeadline || undefined,
     })
     if (!result) throw new Error(providerError || 'Failed to create')
     try { router.push('/admin/tasks') } catch {}

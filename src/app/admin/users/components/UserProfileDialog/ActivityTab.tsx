@@ -22,7 +22,7 @@ interface ActivityLog {
     email: string
     avatar?: string
   }
-  details: any
+  details: Record<string, unknown>
   message: string
 }
 

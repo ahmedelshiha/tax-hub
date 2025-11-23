@@ -210,9 +210,9 @@ function ReminderSection({ title, data, onChange }: { title: string; data: Recor
     <div className="border rounded-md p-4">
       <h3 className="text-sm font-semibold mb-3">{title}</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Toggle label="Enabled" value={data?.enabled ?? true} onChange={(v) => onChange('enabled', v)} />
-        <NumberField label="Offset Hours" value={data?.offsetHours ?? 24} onChange={(v) => onChange('offsetHours', v)} />
-        <TextField label="Template ID" value={data?.templateId ?? ''} onChange={(v) => onChange('templateId', v)} />
+        <Toggle label="Enabled" value={(data?.enabled as boolean) ?? true} onChange={(v) => onChange('enabled', v)} />
+        <NumberField label="Offset Hours" value={(data?.offsetHours as number) ?? 24} onChange={(v) => onChange('offsetHours', v)} />
+        <TextField label="Template ID" value={(data?.templateId as string) ?? ''} onChange={(v) => onChange('templateId', v)} />
       </div>
       <div className="grid grid-cols-3 gap-4 mt-2">
         <Toggle label="Email" value={has('email')} onChange={() => toggleChannel('email')} />

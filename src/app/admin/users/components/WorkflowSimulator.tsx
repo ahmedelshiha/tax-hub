@@ -13,7 +13,7 @@ interface ExecutionStep {
   nodeId: string
   status: 'SUCCESS' | 'FAILED' | 'SKIPPED'
   timestamp: Date | string
-  output?: any
+  output?: unknown
   error?: string
 }
 

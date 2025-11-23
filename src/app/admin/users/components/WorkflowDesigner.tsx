@@ -37,7 +37,7 @@ export function WorkflowDesigner({
   const validationResult = workflowDesignerService.validateWorkflow(workflow)
 
   // Handle node operations
-  const handleAddNode = (nodeType: any) => {
+  const handleAddNode = (nodeType: string) => {
     const newNode: WorkflowNode = {
       id: `node-${Date.now()}`,
       type: nodeType,

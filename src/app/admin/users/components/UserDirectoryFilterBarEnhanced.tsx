@@ -125,15 +125,15 @@ export function UserDirectoryFilterBarEnhanced({
     filterHistory.addEntry(next)
   }, [filters, onFiltersChange, filterHistory])
 
-  const handleSuggestionSelect = useCallback((suggestion: any) => {
-    const next: FilterState = { ...filters, search: suggestion.text, roles: filters.roles || [], statuses: filters.statuses || [] }
+  const handleSuggestionSelect = useCallback((suggestion: Record<string, unknown>) => {
+    const next: FilterState = { ...filters, search: (suggestion as any).text, roles: filters.roles || [], statuses: filters.statuses || [] }
     onFiltersChange(next)
     setSuggestionsOpen(false)
   }, [filters, onFiltersChange])
 
-  const handleLoadPreset = useCallback((preset: any) => {
-    onFiltersChange(preset.filters)
-    filterHistory.addEntry(preset.filters)
+  const handleLoadPreset = useCallback((preset: Record<string, unknown>) => {
+    onFiltersChange((preset as any).filters)
+    filterHistory.addEntry((preset as any).filters)
     setPresetsOpen(false)
   }, [onFiltersChange, filterHistory])
 
@@ -165,10 +165,10 @@ export function UserDirectoryFilterBarEnhanced({
     filterHistory.addEntry(newFilters)
   }, [queryBuilder, filters, onFiltersChange, filterHistory])
 
-  const handleLoadTemplate = useCallback((template: any) => {
-    if (template.query) {
-      queryBuilder.setQuery(template.query)
-      handleApplyAdvancedQuery(template.query)
+  const handleLoadTemplate = useCallback((template: Record<string, unknown>) => {
+    if ((template as any).query) {
+      queryBuilder.setQuery((template as any).query)
+      handleApplyAdvancedQuery((template as any).query)
     }
   }, [queryBuilder, handleApplyAdvancedQuery])
 

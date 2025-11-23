@@ -306,7 +306,7 @@ function NodeTypeBar({
 function BottleneckItem({
   bottleneck
 }: {
-  bottleneck: any
+  bottleneck: Record<string, unknown>
 }) {
   const node = { id: bottleneck.nodeId }
 
@@ -354,7 +354,7 @@ function IssueSection({
 function IssueItem({
   item
 }: {
-  item: any
+  item: Record<string, unknown>
 }) {
   return (
     <div className="text-sm p-2 bg-red-50 rounded border border-red-200">

@@ -85,41 +85,41 @@ function applySearchOperator(
 
   switch (operator) {
     case 'exact':
-      return users.filter(user =>
-        fieldsToSearch.some(f => {
-          const value = getNestedValue(user, f)
-          return value?.toLowerCase() === searchTerm.toLowerCase()
+      return users.filter((user: UserItem) =>
+        fieldsToSearch.some((f: string) => {
+          const value = getNestedValue(user as unknown as Record<string, unknown>, f)
+          return String(value ?? '').toLowerCase() === searchTerm.toLowerCase()
         })
       )
 
     case 'startsWith':
-      return users.filter(user =>
-        fieldsToSearch.some(f => {
-          const value = getNestedValue(user, f)
-          return value?.toLowerCase().startsWith(searchTerm.toLowerCase())
+      return users.filter((user: UserItem) =>
+        fieldsToSearch.some((f: string) => {
+          const value = getNestedValue(user as unknown as Record<string, unknown>, f)
+          return String(value ?? '').toLowerCase().startsWith(searchTerm.toLowerCase())
         })
       )
 
     case 'endsWith':
-      return users.filter(user =>
-        fieldsToSearch.some(f => {
-          const value = getNestedValue(user, f)
-          return value?.toLowerCase().endsWith(searchTerm.toLowerCase())
+      return users.filter((user: UserItem) =>
+        fieldsToSearch.some((f: string) => {
+          const value = getNestedValue(user as unknown as Record<string, unknown>, f)
+          return String(value ?? '').toLowerCase().endsWith(searchTerm.toLowerCase())
         })
       )
 
     case 'emailDomain':
-      return users.filter(user => {
-        const email = user.email?.toLowerCase() || ''
+      return users.filter((user: UserItem) => {
+        const email = (user.email as string)?.toLowerCase() || ''
         return email.endsWith(`@${searchTerm.toLowerCase()}`)
       })
 
     case 'contains':
     default:
-      return users.filter(user =>
-        fieldsToSearch.some(f => {
-          const value = getNestedValue(user, f)
-          return value?.toLowerCase().includes(searchTerm.toLowerCase())
+      return users.filter((user: UserItem) =>
+        fieldsToSearch.some((f: string) => {
+          const value = getNestedValue(user as unknown as Record<string, unknown>, f)
+          return String(value ?? '').toLowerCase().includes(searchTerm.toLowerCase())
         })
       )
   }

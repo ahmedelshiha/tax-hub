@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 interface WorkflowBuilderProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm?: (workflow: any) => void
+  onConfirm?: (workflow: Record<string, unknown>) => void
 }
 
 export function WorkflowBuilder({ isOpen, onClose, onConfirm }: WorkflowBuilderProps) {
