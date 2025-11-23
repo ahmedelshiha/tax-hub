@@ -5,7 +5,16 @@ Make the fresh migration idempotent by wrapping all CREATE statements in DO bloc
 import re
 from pathlib import Path
 
-migration_file = Path("c:/Users/User/taxhub003/prisma/migrations/20251123231126_init/migration.sql")
+migrations_dir = Path("c:/Users/User/taxhub003/prisma/migrations")
+# Find the latest migration folder
+migration_dirs = [d for d in migrations_dir.iterdir() if d.is_dir() and d.name.startswith("2025")]
+if not migration_dirs:
+    print("❌ No migration directory found!")
+    exit(1)
+
+# Sort by name (timestamp) and pick the last one
+latest_migration_dir = sorted(migration_dirs, key=lambda d: d.name)[-1]
+migration_file = latest_migration_dir / "migration.sql"
 
 print(f"📄 Reading fresh migration file...")
 content = migration_file.read_text(encoding='utf-8')
