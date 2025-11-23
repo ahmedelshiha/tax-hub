@@ -465,7 +465,7 @@ function useClients() {
         const data = await response.json().catch(() => ({}))
         const users = Array.isArray(data) ? data : (data?.users || [])
         const clients = users.filter((user: Record<string, any>) => String(user.role || '').toUpperCase() === 'CLIENT')
-        const mapped: ClientItem[] = clients.map((client: Record<string, any>) => ({ id: client.id, name: client.name || client.email || 'Unknown', tier: (() => { const cnt = Number(client.totalBookings || 0); if (cnt >= 20) return 'Enterprise'; if (cnt >= 1) return 'SMB'; return 'Individual' })() }))
+        const mapped: ClientItem[] = clients.map((client: { id: string; name?: string; email?: string; totalBookings?: number }) => ({ id: client.id, name: client.name || client.email || 'Unknown', tier: (() => { const cnt = Number(client.totalBookings || 0); if (cnt >= 20) return 'Enterprise'; if (cnt >= 1) return 'SMB'; return 'Individual' })() }))
         setItems(mapped)
       } catch {}
     })()
@@ -483,7 +483,7 @@ function useBookings() {
         const response = await apiFetch('/api/admin/bookings?limit=50&offset=0&sortBy=scheduledAt&sortOrder=desc', { signal: abortController.signal })
         const data = await response.json().catch(() => ({}))
         const bookings = Array.isArray(data) ? data : (data?.bookings || [])
-        const mapped: BookingItem[] = bookings.map((booking: any) => ({ id: booking.id, clientName: booking.client?.name || booking.clientName || 'Unknown', service: booking.service?.name || booking.serviceName || 'Service', date: (booking.scheduledAt ? String(booking.scheduledAt) : new Date().toISOString()).slice(0, 10) }))
+        const mapped: BookingItem[] = bookings.map((booking: { id: string; client?: { name: string }; clientName?: string; service?: { name: string }; serviceName?: string; scheduledAt?: string | Date }) => ({ id: booking.id, clientName: booking.client?.name || booking.clientName || 'Unknown', service: booking.service?.name || booking.serviceName || 'Service', date: (booking.scheduledAt ? String(booking.scheduledAt) : new Date().toISOString()).slice(0, 10) }))
         setItems(mapped)
       } catch {}
     })()
@@ -500,7 +500,7 @@ function useTasksForDeps() {
       try {
         const response = await apiFetch('/api/admin/tasks?limit=200', { signal: abortController.signal })
         const data = await response.json().catch(() => [])
-        const mapped = (Array.isArray(data) ? data : []).map((t: any) => ({ id: t.id, title: t.title || 'Untitled' }))
+        const mapped = (Array.isArray(data) ? data : []).map((t: { id: string; title?: string }) => ({ id: t.id, title: t.title || 'Untitled' }))
         setItems(mapped)
       } catch {}
     })()
@@ -515,7 +515,7 @@ function AssigneeSelect({ value, onChange, availableUsers = [] }: { value: strin
   return (
     <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-400 transition-all">
       <option value="">Assign to...</option>
-      {users.map((user: any) => (<option key={user.id} value={user.id}>{user.name} {user.role && `(${user.role})`}</option>))}
+      {users.map((user: UserItem) => (<option key={user.id} value={user.id}>{user.name} {user.role && `(${user.role})`}</option>))}
     </select>
   )
 }
