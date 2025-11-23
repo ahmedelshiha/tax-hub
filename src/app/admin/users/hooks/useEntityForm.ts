@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 export type FormMode = 'create' | 'edit'
 
 export interface ValidationRule {
-  validate: (value: any, formData: any) => boolean
+  validate: (value: unknown, formData: Record<string, unknown>) => boolean
   message: string
 }
 
