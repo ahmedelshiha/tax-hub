@@ -3,12 +3,13 @@
 import React, { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import UsersTableWrapper from './UsersTableWrapper'
+import type { UserItem } from '../../contexts/UsersContextProvider'
 
 interface UserDirectorySectionProps {
   selectedUserIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
   filters?: Record<string, unknown>
-  onViewProfileInline?: (user: Record<string, unknown>) => void
+  onViewProfileInline?: (user: UserItem) => void
 }
 
 /**

@@ -118,9 +118,11 @@ export function useBatchOptimisticUpdate() {
         const results = await Promise.all(apiCalls.map(call => call()))
 
         // Update optimistic data with actual server response
-        results.forEach((result, index) => {
-          if (result?.id) {
-            newOptimistic.set(result.id, result)
+        results.forEach((result) => {
+          // Type guard: check if result has an id property
+          if (result && typeof result === 'object' && 'id' in result) {
+            const typedResult = result as { id: string | number;[key: string]: unknown }
+            newOptimistic.set(typedResult.id, result)
           }
         })
         setOptimisticUpdates(newOptimistic)

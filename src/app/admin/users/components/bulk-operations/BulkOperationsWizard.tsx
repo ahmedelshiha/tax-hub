@@ -7,8 +7,8 @@ import { AlertCircle, RotateCcw } from 'lucide-react'
 import { SelectUsersStep } from './SelectUsersStep'
 import { ChooseOperationStep } from './ChooseOperationStep'
 import { ConfigureStep } from './ConfigureStep'
-import { ReviewStep } from './ReviewStep'
-import { ExecuteStep } from './ExecuteStep'
+import { ReviewStep, type DryRunResults } from './ReviewStep'
+import { ExecuteStep, type OperationProgress } from './ExecuteStep'
 import { CompletionStep } from './CompletionStep'
 
 export interface BulkOperationResult {
@@ -27,8 +27,8 @@ export interface WizardState {
   operationConfig: Record<string, unknown>
   userFilter: Record<string, unknown>
   operationId?: string
-  dryRunResults?: unknown
-  executionProgress?: unknown
+  dryRunResults?: DryRunResults
+  executionProgress?: OperationProgress
   executionResult?: BulkOperationResult
 }
 
@@ -245,18 +245,18 @@ export const BulkOperationsWizard: React.FC<BulkOperationsWizardProps> = ({
               onClick={() => goToStep(s.number as WizardState['step'])}
               disabled={s.number > state.step && state.step < 5}
               className={`flex flex-col items-center gap-1 text-sm transition-all ${s.number === state.step
-                  ? 'text-blue-600 font-semibold'
-                  : s.number < state.step
-                    ? 'text-green-600 cursor-pointer'
-                    : 'text-gray-400 cursor-not-allowed'
+                ? 'text-blue-600 font-semibold'
+                : s.number < state.step
+                  ? 'text-green-600 cursor-pointer'
+                  : 'text-gray-400 cursor-not-allowed'
                 }`}
             >
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${s.number === state.step
-                    ? 'bg-blue-100 text-blue-600'
-                    : s.number < state.step
-                      ? 'bg-green-100 text-green-600'
-                      : 'bg-gray-100 text-gray-400'
+                  ? 'bg-blue-100 text-blue-600'
+                  : s.number < state.step
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-gray-100 text-gray-400'
                   }`}
               >
                 {s.number < state.step ? '✓' : s.number}

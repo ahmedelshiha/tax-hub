@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 
-interface OperationProgress {
+export interface OperationProgress {
   status: string
   progressPercent: number
   totalUsers: number
@@ -87,7 +87,7 @@ export const ExecuteStep: React.FC<ExecuteStepProps> = ({
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
     switch (status) {
       case 'COMPLETED':
         return 'bg-green-50 border-green-200'
@@ -100,7 +100,7 @@ export const ExecuteStep: React.FC<ExecuteStepProps> = ({
     }
   }
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status?: string) => {
     switch (status) {
       case 'COMPLETED':
         return '✓ Completed'

@@ -22,7 +22,7 @@ interface ImportWizardProps {
   onImportComplete?: (results: ImportResults) => void
 }
 
-interface ImportResults {
+export interface ImportResults {
   totalRows: number
   successfulRows: number
   failedRows: number
@@ -30,7 +30,7 @@ interface ImportResults {
   warnings: string[]
 }
 
-interface ImportError {
+export interface ImportError {
   row: number
   field: string
   message: string
@@ -226,11 +226,10 @@ export function ImportWizard({ onImportComplete }: ImportWizardProps) {
         ].map((s) => (
           <div key={s.num} className="flex items-center gap-2">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                step >= s.num
+              className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${step >= s.num
                   ? 'bg-primary text-white'
                   : 'bg-gray-200 text-gray-600'
-              }`}
+                }`}
             >
               {step > s.num ? '✓' : s.num}
             </div>
@@ -253,11 +252,10 @@ export function ImportWizard({ onImportComplete }: ImportWizardProps) {
                 <button
                   key={format}
                   onClick={() => setSelectedFormat(format)}
-                  className={`p-4 rounded-lg border-2 transition-colors ${
-                    selectedFormat === format
+                  className={`p-4 rounded-lg border-2 transition-colors ${selectedFormat === format
                       ? 'border-primary bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <div className="font-semibold">{format}</div>
                   <div className="text-sm text-muted-foreground">

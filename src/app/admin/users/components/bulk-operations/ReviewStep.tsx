@@ -6,14 +6,14 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
-interface Conflict {
+export interface Conflict {
   type: string
   message: string
   severity: 'critical' | 'high' | 'medium' | 'low'
   requiresApproval?: boolean
 }
 
-interface ImpactAnalysis {
+export interface ImpactAnalysis {
   directlyAffectedCount: number
   potentiallyAffectedCount: number
   estimatedDuration: number
@@ -24,14 +24,14 @@ interface ImpactAnalysis {
   }
 }
 
-interface PreviewChange {
+export interface PreviewChange {
   userName: string
   conflicts?: Conflict[]
   riskLevel?: string
   changes: Record<string, unknown>
 }
 
-interface DryRunResults {
+export interface DryRunResults {
   riskLevel: 'critical' | 'high' | 'medium' | 'low'
   overallRiskMessage: string
   canProceed: boolean

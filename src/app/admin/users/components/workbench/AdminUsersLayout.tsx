@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { QuickActionsBar } from '../QuickActionsBar'
-import { ImportWizard } from '../ImportWizard'
+import { ImportWizard, type ImportResults } from '../ImportWizard'
 import { CreateUserModal } from '@/components/admin/shared/CreateUserModal'
 import OverviewCards from './OverviewCards'
 import UserDirectorySection from './UserDirectorySection'
@@ -11,7 +11,7 @@ import InlineCreateUser from './InlineCreateUser'
 import InlineUserProfile from './InlineUserProfile'
 import { BuilderHeaderSlot, BuilderMetricsSlot, BuilderFooterSlot } from './BuilderSlots'
 import { useIsBuilderEnabled } from '@/hooks/useIsBuilderEnabled'
-import { useUsersContext } from '../../contexts/UsersContextProvider'
+import { useUsersContext, type UserItem } from '../../contexts/UsersContextProvider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import '../styles/admin-users-layout.css'
@@ -42,19 +42,13 @@ import '../styles/admin-users-layout.css'
  * - Tablet (768-1399px): Sidebar hidden, drawer toggle
  * - Mobile (<768px): Full-width, sidebar as drawer
  */
-interface ImportResults {
-  successfulRows: number
-  failedRows: number
-  errors?: string[]
-}
-
 export default function AdminUsersLayout() {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
   const [filters, setFilters] = useState<Record<string, unknown>>({})
   const [showImportWizard, setShowImportWizard] = useState(false)
   const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   const [showCreateUserInline, setShowCreateUserInline] = useState(false)
-  const [inlineProfileUser, setInlineProfileUser] = useState<Record<string, unknown> | null>(null)
+  const [inlineProfileUser, setInlineProfileUser] = useState<UserItem | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const isBuilderEnabled = useIsBuilderEnabled()
   const context = useUsersContext()
