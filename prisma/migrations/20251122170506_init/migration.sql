@@ -294,7 +294,7 @@ DO $$ BEGIN
         CONSTRAINT "languages_pkey" PRIMARY KEY ("code")
     );
 EXCEPTION
-    WHEN duplicate_object THEN null;
+    WHEN duplicate_table THEN null;
 END $$;
 
 -- CreateTable
