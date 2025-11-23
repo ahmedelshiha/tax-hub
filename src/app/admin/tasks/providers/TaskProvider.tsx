@@ -46,25 +46,26 @@ const mapPriorityToDb = (p: TaskPriority): string => {
 
 // Normalize DB task to UI Task shape to avoid runtime crashes
 const toUiTask = (row: Record<string, unknown>): Task => {
-  const assignee = row.assignee ? { id: row.assignee.id, name: row.assignee.name || row.assignee.email || 'User', email: row.assignee.email || '', role: 'STAFF' } : undefined
+  const assigneeObj = row.assignee as Record<string, unknown> | undefined
+  const assignee = assigneeObj ? { id: String(assigneeObj.id ?? ''), name: String(assigneeObj.name || assigneeObj.email || 'User'), email: String(assigneeObj.email ?? ''), role: 'STAFF' } : undefined
   return {
-    id: row.id,
-    title: row.title || 'Untitled',
-    description: row.description || '',
-    priority: mapPriorityFromDb(row.priority),
-    status: mapStatusFromDb(row.status),
+    id: String(row.id ?? ''),
+    title: String(row.title ?? 'Untitled'),
+    description: String(row.description ?? ''),
+    priority: mapPriorityFromDb(String(row.priority ?? '')),
+    status: mapStatusFromDb(String(row.status ?? '')),
     category: 'system',
-    dueDate: row.dueAt ? new Date(row.dueAt).toISOString() : new Date(row.createdAt || Date.now()).toISOString(),
-    createdAt: row.createdAt ? new Date(row.createdAt).toISOString() : new Date().toISOString(),
-    updatedAt: row.updatedAt ? new Date(row.updatedAt).toISOString() : new Date().toISOString(),
+    dueDate: row.dueAt ? new Date(String(row.dueAt)).toISOString() : new Date(row.createdAt ? String(row.createdAt) : Date.now()).toISOString(),
+    createdAt: row.createdAt ? new Date(String(row.createdAt)).toISOString() : new Date().toISOString(),
+    updatedAt: row.updatedAt ? new Date(String(row.updatedAt)).toISOString() : new Date().toISOString(),
     completedAt: undefined,
     estimatedHours: 0,
     actualHours: undefined,
     assignee,
-    assigneeId: row.assigneeId || assignee?.id || undefined,
+    assigneeId: String(row.assigneeId ?? assignee?.id ?? ''),
     collaborators: [],
     createdBy: { id: 'system', name: 'System', email: 'system@local', role: 'system' },
-    completionPercentage: mapStatusFromDb(row.status) === 'completed' ? 100 : 0,
+    completionPercentage: mapStatusFromDb(String(row.status ?? '')) === 'completed' ? 100 : 0,
     progress: [],
     dependencies: [],
     blockedBy: [],
