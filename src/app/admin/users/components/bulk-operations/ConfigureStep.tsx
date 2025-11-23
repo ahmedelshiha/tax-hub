@@ -9,10 +9,24 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 
+interface OperationConfig {
+  fromRole?: string
+  toRole?: string
+  toStatus?: string
+  reason?: string
+  permissions?: string[]
+  emailTemplate?: string
+  customMessage?: string
+  sendImmediately?: boolean
+  notifyUsers?: boolean
+  requireApproval?: boolean
+  [key: string]: unknown
+}
+
 interface ConfigureStepProps {
   operationType: string
-  config: Record<string, any>
-  onConfigChange: (config: Record<string, any>) => void
+  config: OperationConfig
+  onConfigChange: (config: OperationConfig) => void
   onNext: () => void
 }
 
@@ -151,7 +165,7 @@ export const ConfigureStep: React.FC<ConfigureStepProps> = ({
                         } else {
                           onConfigChange({
                             ...config,
-                            permissions: perms.filter((p: string) => p !== perm)
+                            permissions: perms.filter((p) => p !== perm)
                           })
                         }
                       }}

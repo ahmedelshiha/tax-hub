@@ -7,11 +7,19 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 
+interface OperationProgress {
+  status: string
+  progressPercent: number
+  totalUsers: number
+  successCount: number
+  failureCount: number
+}
+
 interface ExecuteStepProps {
   tenantId: string
   operationId?: string
-  progress?: any
-  onExecute: (id: string, progress: any) => void
+  progress?: OperationProgress
+  onExecute: (id: string, progress: OperationProgress) => void
 }
 
 export const ExecuteStep: React.FC<ExecuteStepProps> = ({
@@ -38,7 +46,7 @@ export const ExecuteStep: React.FC<ExecuteStepProps> = ({
 
         if (!response.ok) throw new Error('Failed to fetch progress')
 
-        const prog = await response.json()
+        const prog: OperationProgress = await response.json()
         setCurrentProgress(prog)
 
         if (prog.status === 'COMPLETED' || prog.status === 'FAILED') {
@@ -137,8 +145,8 @@ export const ExecuteStep: React.FC<ExecuteStepProps> = ({
                   currentProgress?.status === 'COMPLETED'
                     ? 'default'
                     : currentProgress?.status === 'FAILED'
-                    ? 'destructive'
-                    : 'secondary'
+                      ? 'destructive'
+                      : 'secondary'
                 }
               >
                 {getStatusText(currentProgress?.status)}

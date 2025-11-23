@@ -144,7 +144,7 @@ export function useFilterUsers(
 
       result = result.filter((user) => {
         return searchFields!.some((field) => {
-          const value = field.split('.').reduce((obj: any, key) => obj?.[key], user) as string
+          const value = field.split('.').reduce((obj: Record<string, any>, key) => obj?.[key], user) as string
           if (!value) return false
 
           const valueStr = caseInsensitive ? String(value).toLowerCase() : String(value)
@@ -166,7 +166,7 @@ export function useFilterUsers(
     // Apply tier filter (for clients)
     if (filters.tier && filters.tier !== 'all' && filters.tier !== 'ALL') {
       result = result.filter((user) => {
-        const userTier = (user as any).tier || ''
+        const userTier = (user as Record<string, any>).tier || ''
         const filterTier = caseInsensitive ? filters.tier!.toLowerCase() : filters.tier
         const userTierNorm = caseInsensitive ? userTier.toLowerCase() : userTier
         return userTierNorm === filterTier
@@ -181,8 +181,8 @@ export function useFilterUsers(
     // Sort by specified field or creation date
     if (filters.sortBy && filters.sortBy !== 'createdAt') {
       result = result.sort((a, b) => {
-        const aVal = (a as any)[filters.sortBy!]
-        const bVal = (b as any)[filters.sortBy!]
+        const aVal = (a as Record<string, any>)[filters.sortBy!]
+        const bVal = (b as Record<string, any>)[filters.sortBy!]
 
         if (aVal === bVal) return 0
 

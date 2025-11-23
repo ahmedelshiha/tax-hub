@@ -8,7 +8,7 @@ interface ModalRealtimeOptions {
   entityId: string | number
   entityType: EntityType
   onEntityDeleted?: () => void
-  onEntityUpdated?: (data: any) => void
+  onEntityUpdated?: (data: Record<string, unknown>) => void
 }
 
 /**
@@ -28,7 +28,7 @@ export function useModalRealtime({
 }: ModalRealtimeOptions) {
   const [isStale, setIsStale] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
-  const [updatedData, setUpdatedData] = useState<any>(null)
+  const [updatedData, setUpdatedData] = useState<Record<string, unknown> | null>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
 
   const handleRealtimeEvent = useCallback((event: MessageEvent) => {
@@ -36,7 +36,7 @@ export function useModalRealtime({
       const message = JSON.parse(event.data)
 
       // Check if this event affects our entity
-      const affectsOurEntity = 
+      const affectsOurEntity =
         (message.data?.userId === entityId && ['user-updated', 'user-deleted'].includes(message.type)) ||
         (message.data?.id === entityId && ['user-updated', 'user-deleted'].includes(message.type))
 

@@ -94,14 +94,14 @@ export function useOptimisticUpdate<T extends { id: string | number }>(
  * Batch optimistic updates for multiple entities
  */
 export function useBatchOptimisticUpdate() {
-  const [optimisticUpdates, setOptimisticUpdates] = useState<Map<string | number, any>>(new Map())
+  const [optimisticUpdates, setOptimisticUpdates] = useState<Map<string | number, unknown>>(new Map())
   const [error, setError] = useState<Error | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const executeBatch = useCallback(
     async (
-      updates: Array<{ id: string | number; data: any }>,
-      apiCalls: Array<() => Promise<any>>
+      updates: Array<{ id: string | number; data: unknown }>,
+      apiCalls: Array<() => Promise<unknown>>
     ) => {
       const newOptimistic = new Map(optimisticUpdates)
 

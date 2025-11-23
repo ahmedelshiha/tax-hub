@@ -7,8 +7,8 @@ import UsersTableWrapper from './UsersTableWrapper'
 interface UserDirectorySectionProps {
   selectedUserIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
-  filters?: Record<string, any>
-  onViewProfileInline?: (user: any) => void
+  filters?: Record<string, unknown>
+  onViewProfileInline?: (user: Record<string, unknown>) => void
 }
 
 /**

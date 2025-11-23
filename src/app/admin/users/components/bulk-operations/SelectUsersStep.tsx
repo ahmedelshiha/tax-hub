@@ -7,10 +7,16 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 
+interface UserFilter {
+  searchTerm?: string
+  roles?: string[]
+  [key: string]: any
+}
+
 interface SelectUsersStepProps {
   tenantId: string
-  filter: Record<string, any>
-  onFilterChange: (filter: Record<string, any>) => void
+  filter: UserFilter
+  onFilterChange: (filter: UserFilter) => void
   onSelectUsers: (userIds: string[]) => void
   onNext: () => void
 }
@@ -70,7 +76,7 @@ export const SelectUsersStep: React.FC<SelectUsersStepProps> = ({
     }
 
     if (filter.roles && filter.roles.length > 0) {
-      result = result.filter(u => filter.roles.includes(u.role))
+      result = result.filter(u => filter.roles?.includes(u.role))
     }
 
     setFilteredUsers(result)

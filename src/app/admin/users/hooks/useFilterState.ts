@@ -44,7 +44,7 @@ export function useFilterState(users: UserItem[]) {
   // Helper function to evaluate advanced query conditions
   const evaluateAdvancedQuery = useCallback((user: UserItem, query: FilterGroup | FilterCondition): boolean => {
     const evaluateCondition = (cond: FilterCondition): boolean => {
-      const fieldValue = (user as any)[cond.field]
+      const fieldValue = (user as unknown as Record<string, unknown>)[cond.field]
       const value = cond.value
 
       switch (cond.operator) {
@@ -148,7 +148,7 @@ export function useFilterState(users: UserItem[]) {
     setFilters({ search: '', roles: [], statuses: [], advancedQuery: undefined })
   }, [])
 
-  const updateFilter = useCallback((key: keyof FilterState, value: any) => {
+  const updateFilter = useCallback((key: keyof FilterState, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }, [])
 

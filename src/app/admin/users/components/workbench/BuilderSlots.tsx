@@ -13,7 +13,16 @@ import BulkActionsPanel from './BulkActionsPanel'
  *
  * Converts Builder.io block structure to React elements
  */
-function renderBuilderBlocks(blocks: any[]): React.ReactNode {
+interface BuilderBlock {
+  id?: string
+  className?: string
+  style?: React.CSSProperties
+  children?: BuilderBlock[]
+  content?: React.ReactNode
+  [key: string]: unknown
+}
+
+function renderBuilderBlocks(blocks: BuilderBlock[]): React.ReactNode {
   if (!Array.isArray(blocks)) {
     return null
   }
@@ -174,7 +183,7 @@ export function BuilderFooterSlot(props: Parameters<typeof BulkActionsPanel>[0])
  * Renders Builder.io content for the main directory/table area
  * This slot allows customizing the layout of the user directory section
  */
-export function BuilderMainSlot(props?: any) {
+export function BuilderMainSlot(props?: Record<string, unknown>) {
   const { content, isLoading, error, isEnabled } = useBuilderContent(
     BUILDER_MODELS.ADMIN_WORKBENCH_MAIN
   )

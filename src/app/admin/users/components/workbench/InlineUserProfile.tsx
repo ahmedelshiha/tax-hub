@@ -64,7 +64,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
     }
     setEditMode(false)
     setActiveTab('overview')
-    setSelectedUser(null as any)
+    setSelectedUser(null)
     onBack()
   }, [onBack, setActiveTab, setEditMode, setSelectedUser, editMode, hasChanges])
 
@@ -167,11 +167,10 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                   {selectedUser.role || 'VIEWER'}
                 </span>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                  selectedUser.status === 'ACTIVE'
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${selectedUser.status === 'ACTIVE'
                     ? 'bg-green-100 text-green-800 border border-green-200'
                     : 'bg-red-100 text-red-800 border border-red-200'
-                }`}>
+                  }`}>
                   {selectedUser.status || 'ACTIVE'}
                 </span>
               </div>
@@ -195,9 +194,8 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
-                activeTab === id ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent text-slate-600 hover:text-slate-900'
-              }`}
+              className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${activeTab === id ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent text-slate-600 hover:text-slate-900'
+                }`}
             >
               {id.charAt(0).toUpperCase() + id.slice(1)}
             </button>
@@ -220,12 +218,11 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
               ] as const).map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                    activeTab === item.id
+                  onClick={() => setActiveTab(item.id as 'overview' | 'details' | 'permissions' | 'activity' | 'settings')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${activeTab === item.id
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   <span>{item.label}</span>
                 </button>

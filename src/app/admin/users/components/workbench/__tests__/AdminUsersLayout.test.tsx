@@ -13,7 +13,7 @@ vi.mock('@/hooks/useBuilderContent', () => ({
 
 // Mock child heavy components to speed up tests
 vi.mock('../UserDirectorySection', () => ({
-  default: (props: any) => (
+  default: (props: Record<string, unknown>) => (
     <div data-testid="user-directory-section">
       Mock User Directory - {props.selectedCount} selected
       <button onClick={() => props.onSelectionChange?.(new Set(['1']))}>

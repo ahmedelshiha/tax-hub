@@ -19,7 +19,7 @@ import '../styles/mobile-optimizations.css'
 interface UsersTableWrapperProps {
   selectedUserIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
-  filters?: Record<string, any>
+  filters?: Record<string, unknown>
   onViewProfileInline?: (user: UserItem) => void
 }
 
@@ -97,7 +97,7 @@ export default function UsersTableWrapper({
     [updateUserRole]
   )
 
-  const handleEditInline = useCallback(async (userId: string, field: string, value: any) => {
+  const handleEditInline = useCallback(async (userId: string, field: string, value: unknown) => {
     try {
       await updateUser(userId, { [field]: value })
     } catch (e) {

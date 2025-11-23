@@ -5,15 +5,15 @@ import { useState, useCallback, useMemo } from 'react'
 export interface EditingCell {
   rowId: string
   field: string
-  originalValue: any
-  currentValue: any
+  originalValue: unknown
+  currentValue: unknown
 }
 
 interface UseInlineEditResult {
   editingCell: EditingCell | null
   isEditing: boolean
-  startEdit: (rowId: string, field: string, currentValue: any) => void
-  updateValue: (value: any) => void
+  startEdit: (rowId: string, field: string, currentValue: unknown) => void
+  updateValue: (value: unknown) => void
   cancelEdit: () => void
   confirmEdit: (callback?: (cell: EditingCell) => Promise<void>) => Promise<void>
   hasChanges: boolean
@@ -40,7 +40,7 @@ export function useInlineEdit(): UseInlineEditResult {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null)
 
   const startEdit = useCallback(
-    (rowId: string, field: string, currentValue: any) => {
+    (rowId: string, field: string, currentValue: unknown) => {
       setEditingCell({
         rowId,
         field,
@@ -51,7 +51,7 @@ export function useInlineEdit(): UseInlineEditResult {
     []
   )
 
-  const updateValue = useCallback((value: any) => {
+  const updateValue = useCallback((value: unknown) => {
     setEditingCell((prev) => {
       if (!prev) return null
       return {

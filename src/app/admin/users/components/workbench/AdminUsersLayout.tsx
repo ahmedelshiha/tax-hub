@@ -42,13 +42,19 @@ import '../styles/admin-users-layout.css'
  * - Tablet (768-1399px): Sidebar hidden, drawer toggle
  * - Mobile (<768px): Full-width, sidebar as drawer
  */
+interface ImportResults {
+  successfulRows: number
+  failedRows: number
+  errors?: string[]
+}
+
 export default function AdminUsersLayout() {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
-  const [filters, setFilters] = useState<Record<string, any>>({})
+  const [filters, setFilters] = useState<Record<string, unknown>>({})
   const [showImportWizard, setShowImportWizard] = useState(false)
   const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   const [showCreateUserInline, setShowCreateUserInline] = useState(false)
-  const [inlineProfileUser, setInlineProfileUser] = useState<any | null>(null)
+  const [inlineProfileUser, setInlineProfileUser] = useState<Record<string, unknown> | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const isBuilderEnabled = useIsBuilderEnabled()
   const context = useUsersContext()
@@ -143,7 +149,7 @@ export default function AdminUsersLayout() {
     }
   }
 
-  const handleImportComplete = (results: any) => {
+  const handleImportComplete = (results: ImportResults) => {
     setShowImportWizard(false)
     toast.success(`Imported ${results.successfulRows} users successfully`)
   }

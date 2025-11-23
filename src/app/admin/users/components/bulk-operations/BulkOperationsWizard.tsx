@@ -35,7 +35,7 @@ export interface WizardState {
 interface BulkOperationsWizardProps {
   tenantId: string
   onClose: () => void
-  onExecute?: (operationId: string, operationConfig: Record<string, any>, userIds: string[]) => Promise<BulkOperationResult>
+  onExecute?: (operationId: string, operationConfig: Record<string, unknown>, userIds: string[]) => Promise<BulkOperationResult>
   onRollback?: (operationId: string) => Promise<void>
   showAdvancedFeatures?: boolean
 }
@@ -80,7 +80,7 @@ export const BulkOperationsWizard: React.FC<BulkOperationsWizardProps> = ({
 
   const goToStep = useCallback((step: number) => {
     if (step >= 1 && step <= maxStep) {
-      setState(prev => ({ ...prev, step: step as any }))
+      setState(prev => ({ ...prev, step: step as WizardState['step'] }))
       setError(null)
     }
   }, [maxStep])
@@ -242,24 +242,22 @@ export const BulkOperationsWizard: React.FC<BulkOperationsWizardProps> = ({
           {steps.map((s) => (
             <button
               key={s.number}
-              onClick={() => goToStep(s.number as any)}
+              onClick={() => goToStep(s.number as WizardState['step'])}
               disabled={s.number > state.step && state.step < 5}
-              className={`flex flex-col items-center gap-1 text-sm transition-all ${
-                s.number === state.step
+              className={`flex flex-col items-center gap-1 text-sm transition-all ${s.number === state.step
                   ? 'text-blue-600 font-semibold'
                   : s.number < state.step
-                  ? 'text-green-600 cursor-pointer'
-                  : 'text-gray-400 cursor-not-allowed'
-              }`}
+                    ? 'text-green-600 cursor-pointer'
+                    : 'text-gray-400 cursor-not-allowed'
+                }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                  s.number === state.step
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${s.number === state.step
                     ? 'bg-blue-100 text-blue-600'
                     : s.number < state.step
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-400'
-                }`}
+                      ? 'bg-green-100 text-green-600'
+                      : 'bg-gray-100 text-gray-400'
+                  }`}
               >
                 {s.number < state.step ? '✓' : s.number}
               </div>

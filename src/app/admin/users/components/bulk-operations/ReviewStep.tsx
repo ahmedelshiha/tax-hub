@@ -6,13 +6,49 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
+interface Conflict {
+  type: string
+  message: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  requiresApproval?: boolean
+}
+
+interface ImpactAnalysis {
+  directlyAffectedCount: number
+  potentiallyAffectedCount: number
+  estimatedDuration: number
+  estimatedNetworkCalls: number
+  rollbackImpact?: {
+    canRollback: boolean
+    rollbackTime: number
+  }
+}
+
+interface PreviewChange {
+  userName: string
+  conflicts?: Conflict[]
+  riskLevel?: string
+  changes: Record<string, unknown>
+}
+
+interface DryRunResults {
+  riskLevel: 'critical' | 'high' | 'medium' | 'low'
+  overallRiskMessage: string
+  canProceed: boolean
+  conflictCount: number
+  conflicts: Conflict[]
+  impactAnalysis: ImpactAnalysis
+  estimatedDuration: number
+  preview: PreviewChange[]
+}
+
 interface ReviewStepProps {
   tenantId: string
   selectedUserIds: string[]
   operationType: string
-  operationConfig: Record<string, any>
-  dryRunResults?: any
-  onDryRun: (results: any) => void
+  operationConfig: Record<string, unknown>
+  dryRunResults?: DryRunResults
+  onDryRun: (results: DryRunResults) => void
   onNext: () => void
   onExecuteStart?: () => void | Promise<void>
 }
@@ -70,9 +106,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       case 'STATUS_UPDATE':
         return `Update status to ${operationConfig.toStatus}`
       case 'PERMISSION_GRANT':
-        return `Grant ${operationConfig.permissions?.length || 0} permissions`
+        return `Grant ${(operationConfig.permissions as unknown[])?.length || 0} permissions`
       case 'PERMISSION_REVOKE':
-        return `Revoke ${operationConfig.permissions?.length || 0} permissions`
+        return `Revoke ${(operationConfig.permissions as unknown[])?.length || 0} permissions`
       case 'SEND_EMAIL':
         return `Send email using template: ${operationConfig.emailTemplate}`
       default:
@@ -156,18 +192,17 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <h4 className="font-semibold text-sm">Dry-Run Analysis & Impact</h4>
 
           {/* Risk Level */}
-          <Card className={`p-4 border-2 ${
-            dryRunResults.riskLevel === 'critical' ? 'border-red-200 bg-red-50' :
+          <Card className={`p-4 border-2 ${dryRunResults.riskLevel === 'critical' ? 'border-red-200 bg-red-50' :
             dryRunResults.riskLevel === 'high' ? 'border-amber-200 bg-amber-50' :
-            dryRunResults.riskLevel === 'medium' ? 'border-yellow-200 bg-yellow-50' :
-            'border-green-200 bg-green-50'
-          }`}>
+              dryRunResults.riskLevel === 'medium' ? 'border-yellow-200 bg-yellow-50' :
+                'border-green-200 bg-green-50'
+            }`}>
             <div className="flex items-start gap-3">
               <div className="text-2xl">
                 {dryRunResults.riskLevel === 'critical' ? '🚨' :
-                 dryRunResults.riskLevel === 'high' ? '⚠️' :
-                 dryRunResults.riskLevel === 'medium' ? 'ℹ️' :
-                 '✓'}
+                  dryRunResults.riskLevel === 'high' ? '⚠️' :
+                    dryRunResults.riskLevel === 'medium' ? 'ℹ️' :
+                      '✓'}
               </div>
               <div className="flex-1">
                 <div className="font-semibold text-sm mb-1">
@@ -194,15 +229,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             <div className="space-y-2">
               <p className="text-sm font-medium">Detected Issues ({dryRunResults.conflictCount}):</p>
               <div className="space-y-2 max-h-40 overflow-y-auto">
-                {dryRunResults.conflicts.map((conflict: any, idx: number) => (
+                {dryRunResults.conflicts.map((conflict: Conflict, idx: number) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded border text-xs ${
-                      conflict.severity === 'critical' ? 'bg-red-50 border-red-200' :
+                    className={`p-3 rounded border text-xs ${conflict.severity === 'critical' ? 'bg-red-50 border-red-200' :
                       conflict.severity === 'high' ? 'bg-amber-50 border-amber-200' :
-                      conflict.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
-                      'bg-blue-50 border-blue-200'
-                    }`}
+                        conflict.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                          'bg-blue-50 border-blue-200'
+                      }`}
                   >
                     <div className="font-semibold mb-1">
                       {conflict.type.replace(/-/g, ' ').toUpperCase()}
@@ -265,23 +299,22 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
             <div className="space-y-2">
               <p className="text-sm font-medium">Sample Impact (first {dryRunResults.preview.length} users):</p>
               <div className="max-h-48 overflow-y-auto space-y-2">
-                {dryRunResults.preview.map((preview: any, idx: number) => (
+                {dryRunResults.preview.map((preview: PreviewChange, idx: number) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded border text-xs ${
-                      preview.conflicts?.length ? 'bg-red-50 border-red-200' :
+                    className={`p-3 rounded border text-xs ${preview.conflicts?.length ? 'bg-red-50 border-red-200' :
                       preview.riskLevel === 'high' ? 'bg-amber-50 border-amber-200' :
-                      'bg-gray-50 border-gray-200'
-                    }`}
+                        'bg-gray-50 border-gray-200'
+                      }`}
                   >
                     <div className="font-medium text-gray-900 flex justify-between items-start">
                       <span>{preview.userName}</span>
-                      {preview.conflicts?.length > 0 && (
+                      {(preview.conflicts?.length ?? 0) > 0 && (
                         <Badge className="bg-red-100 text-red-800">⚠️ Issues</Badge>
                       )}
                     </div>
                     <div className="text-gray-600 mt-1">
-                      {Object.entries(preview.changes).map(([key, value]: any) => (
+                      {Object.entries(preview.changes).map(([key, value]) => (
                         <div key={key} className="ml-2">
                           <strong>{key}:</strong>{' '}
                           {typeof value === 'object'

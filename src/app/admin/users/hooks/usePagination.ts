@@ -120,7 +120,7 @@ export function usePagination(initialPage = 1, initialLimit = 50) {
     total,
     isLoading,
     error,
-    
+
     // Navigation
     goToPage,
     nextPage,
@@ -130,7 +130,7 @@ export function usePagination(initialPage = 1, initialLimit = 50) {
     setTotalItems,
     setIsLoading,
     setError,
-    
+
     // Metadata
     meta,
     params
@@ -146,7 +146,7 @@ export function usePaginationWithFetch<T>(
     initialPage?: number
     initialLimit?: number
     autoFetch?: boolean
-    deps?: any[]
+    deps?: unknown[]
   } = {}
 ) {
   const {
@@ -163,7 +163,7 @@ export function usePaginationWithFetch<T>(
   const fetchData = useCallback(async () => {
     setIsFetching(true)
     pagination.setIsLoading(true)
-    
+
     try {
       const result = await fetchFn(pagination.params)
       setData(result.data)

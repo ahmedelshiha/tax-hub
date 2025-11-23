@@ -77,11 +77,11 @@ export function useUserActions(options?: UseUserActionsOptions): UseUserActionsR
         }
 
         // Update session if changing current user's role
-        const me = (session?.user as any)?.id
+        const me = (session?.user as Record<string, unknown>)?.id
         if (me && me === userId && typeof updateSession === 'function' && session?.user) {
           try {
-            await updateSession({ user: { ...(session.user as any), role } } as any)
-          } catch {}
+            await updateSession({ user: { ...(session.user as Record<string, unknown>), role } } as unknown)
+          } catch { }
         }
 
         options?.onSuccess?.('Role updated successfully')
