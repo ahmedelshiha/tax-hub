@@ -151,29 +151,8 @@ export function Component<T = any>({
     <div
       className={`${className} component-container`}
       role="article"
-      )}
-
-{/* Portal section - visible only in portal variant */ }
-{
-  variant === 'portal' && (
-    <div className="portal-section">
-      {has && onAction && (
-        <button
-          onClick={() => onAction(data)}
-          disabled={disabled}
-          className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          Action
-        </button>
-      )}
-    </div>
-  )
-}
-
-{/* Main content */ }
-<div className="content">
-  {children}
-</div>
+      {children}
+</ div>
     </div >
   )
 }
