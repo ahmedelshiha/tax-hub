@@ -151,9 +151,55 @@ export function Component<T = any>({
     <div
       className={`${className} component-container`}
       role="article"
-      {children}
-</ div>
-    </div >
+      aria-label={COMPONENT_NAME}
+    >
+      {/* Admin section - visible only in admin variant */}
+      {variant === 'admin' && (
+        <div className="admin-section">
+          <div className="flex gap-2">
+            {has() && onEdit && (
+              <button
+                onClick={() => onEdit(data)}
+                disabled={disabled}
+                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              >
+                Edit
+              </button>
+            )}
+
+            {has() && onDelete && (
+              <button
+                onClick={() => onDelete()}
+                disabled={disabled}
+                className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Portal section - visible only in portal variant */}
+      {variant === 'portal' && (
+        <div className="portal-section">
+          {has() && onAction && (
+            <button
+              onClick={() => onAction(data)}
+              disabled={disabled}
+              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            >
+              Action
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="content">
+        {children}
+      </div>
+    </div>
   )
 }
 
