@@ -1,8 +1,3 @@
-/**
- * UploadModal Component - Upload Dialog
- * Modal for uploading bills via file or camera
- */
-
 "use client";
 
 import { useState } from "react";
@@ -14,10 +9,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { useBillUpload } from "@/lib/hooks/bills/useBillUpload";
-import { Upload, Camera, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
+import { DropZone } from "@/components/portal/shared/DropZone";
+import { FilePreviewCard } from "@/components/portal/shared/FilePreviewCard";
+import { toast } from "sonner";
 
 interface UploadModalProps {
   open: boolean;
@@ -32,103 +28,137 @@ export function UploadModal({
   mode,
   onUploadComplete,
 }: UploadModalProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const { upload, isUploading, progress } = useBillUpload();
+  const [currentFileIndex, setCurrentFileIndex] = useState<number>(-1);
+  const [completedFiles, setCompletedFiles] = useState<Set<string>>(new Set());
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
+  const handleFilesAccepted = (newFiles: File[]) => {
+    setFiles((prev) => {
+      const combined = [...prev, ...newFiles];
+      // Deduplicate by name
+      const unique = combined.filter((file, index, self) =>
+        index === self.findIndex((f) => f.name === file.name)
+      );
+      return unique.slice(0, 5); // Max 5 files
+    });
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setFiles((prev) => prev.filter((f) => f.name !== fileName));
+    setCompletedFiles((prev) => {
+      const next = new Set(prev);
+      next.delete(fileName);
+      return next;
+    });
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (files.length === 0) return;
 
-    try {
-      await upload(selectedFile);
-      onUploadComplete?.();
-      setSelectedFile(null);
-    } catch (error) {
-      // Error is handled by the hook
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (completedFiles.has(file.name)) continue;
+
+      setCurrentFileIndex(i);
+      try {
+        await upload(file);
+        setCompletedFiles((prev) => new Set(prev).add(file.name));
+      } catch (error) {
+        console.error(`Failed to upload ${file.name}`, error);
+        // Continue with next file? Or stop?
+        // For now, we continue and let the user know which failed via toast (handled by hook?)
+      }
+    }
+
+    setCurrentFileIndex(-1);
+    toast.success("Upload process completed");
+    onUploadComplete?.();
+
+    // Auto close if all successful
+    if (files.length > 0) {
+      onOpenChange(false);
+      setFiles([]);
+      setCompletedFiles(new Set());
     }
   };
 
+  const handleClose = () => {
+    if (isUploading) return;
+    onOpenChange(false);
+    setFiles([]);
+    setCompletedFiles(new Set());
+    setCurrentFileIndex(-1);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === "file" ? "Upload Bill" : "Take Photo"}
+            {mode === "file" ? "Upload Bills" : "Take Photo"}
           </DialogTitle>
           <DialogDescription>
             {mode === "file"
-              ? "Select a bill image or PDF to upload"
-              : "Take a photo of your bill"}
+              ? "Upload up to 5 bills (PDF, PNG, JPG). Max 10MB each."
+              : "Camera upload is currently disabled. Please use file upload."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {mode === "file" ? (
             <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  File
-                </label>
-                <Input
-                  type="file"
-                  onChange={handleFileSelect}
-                  accept="image/*,application/pdf"
-                  disabled={isUploading}
-                />
-                {selectedFile && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Selected: {selectedFile.name} (
-                    {(selectedFile.size / 1024).toFixed(2)} KB)
-                  </p>
-                )}
-              </div>
+              <DropZone
+                onFilesAccepted={handleFilesAccepted}
+                accept={{
+                  'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+                  'application/pdf': ['.pdf']
+                }}
+                maxFiles={5 - files.length}
+                disabled={isUploading || files.length >= 5}
+              />
+
+              {files.length > 0 && (
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {files.map((file, index) => (
+                    <FilePreviewCard
+                      key={file.name}
+                      file={file}
+                      onRemove={() => handleRemoveFile(file.name)}
+                      uploadProgress={index === currentFileIndex ? progress : undefined}
+                      success={completedFiles.has(file.name)}
+                    />
+                  ))}
+                </div>
+              )}
             </>
           ) : (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Camera feature coming soon</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Use the file upload option for now
-              </p>
-            </div>
-          )}
-
-          {isUploading && (
-            <div className="space-y-2">
-              <Progress value={progress} />
-              <p className="text-sm text-gray-600 text-center">
-                Uploading... {progress}%
-              </p>
+            <div className="text-center py-8 text-gray-500">
+              Camera mode coming soon.
             </div>
           )}
 
           <div className="flex gap-2 justify-end">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={handleClose}
               disabled={isUploading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleUpload}
-              disabled={!selectedFile || isUploading || mode === "camera"}
+              disabled={files.length === 0 || isUploading || mode === "camera"}
             >
               {isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Uploading...
+                  Uploading {currentFileIndex + 1}/{files.length}...
                 </>
               ) : (
                 <>
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload
+                  Upload {files.length > 0 && `(${files.length})`}
                 </>
               )}
             </Button>

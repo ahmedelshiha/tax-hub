@@ -13,30 +13,26 @@ import FeaturesHub from "@/components/portal/FeaturesHub";
 import {
   Search,
   Clock,
-  FileText,
-  Users,
-  DollarSign,
-  Settings,
   Plus,
   ChevronRight,
   Zap,
-  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { WidgetGrid } from "@/components/portal/dashboard/WidgetGrid";
+import { TasksSummaryWidget } from "@/components/portal/dashboard/widgets/TasksSummaryWidget";
+import { BookingsCalendarWidget } from "@/components/portal/dashboard/widgets/BookingsCalendarWidget";
+import { OutstandingInvoicesWidget } from "@/components/portal/dashboard/widgets/OutstandingInvoicesWidget";
+import { ComplianceTrackerWidget } from "@/components/portal/dashboard/widgets/ComplianceTrackerWidget";
+import { ActivityFeedWidget } from "@/components/portal/dashboard/widgets/ActivityFeedWidget";
+import { TaskQuickCreateModal } from "@/components/portal/modals/TaskQuickCreateModal";
+import { BookingCreateModal } from "@/components/portal/modals/BookingCreateModal";
+import { UploadModal } from "@/components/portal/bills/BillUpload/UploadModal";
 
 interface Entity {
   id: string;
   name: string;
   country: string;
-  status: string;
-}
-
-interface UpcomingCompliance {
-  id: string;
-  type: string;
-  dueAt: string;
-  priority: "high" | "medium" | "low";
   status: string;
 }
 
@@ -49,6 +45,11 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSetupModalOpen, setSetupModalOpen] = useState(false);
 
+  // Modal States
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [createBookingOpen, setCreateBookingOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
   // Fetch user's entities
   const { data: entitiesResponse, isLoading: entitiesLoading } = useSWR<{
     success: boolean;
@@ -60,15 +61,27 @@ export default function DashboardPage() {
   const entities = entitiesResponse?.data || [];
   const primaryEntity = entities[0];
 
-  // Fetch upcoming compliance
-  const { data: complianceResponse } = useSWR<{
-    success: boolean;
-    data: UpcomingCompliance[];
-  }>(primaryEntity ? "/api/compliance/upcoming?limit=3" : null, fetcher, {
-    revalidateOnFocus: false,
+  // Fetch dashboard data
+  const { data: dashboardResponse, isLoading: dashboardLoading, error: dashboardError } = useSWR<{
+    tasks: any[];
+    bookings: any[];
+    invoices: any[];
+    totalOutstanding: number;
+    compliance: any[];
+    activity: any[];
+  }>("/api/portal/dashboard", fetcher, {
+    refreshInterval: 30000, // Refresh every 30 seconds
+    revalidateOnFocus: true
   });
 
-  const upcomingCompliance = complianceResponse?.data || [];
+  const dashboardData = dashboardResponse || {
+    tasks: [],
+    bookings: [],
+    invoices: [],
+    totalOutstanding: 0,
+    compliance: [],
+    activity: []
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +91,7 @@ export default function DashboardPage() {
 
   const countryFlags: Record<string, string> = {
     AE: "🇦🇪",
-    SA: "🇸��",
+    SA: "🇸🇦",
     EG: "🇪🇬",
   };
 
@@ -88,6 +101,25 @@ export default function DashboardPage() {
         open={isSetupModalOpen}
         onOpenChange={setSetupModalOpen}
       />
+
+      {/* Modals */}
+      <TaskQuickCreateModal
+        open={createTaskOpen}
+        onClose={() => setCreateTaskOpen(false)}
+        onSuccess={() => toast.success("Task created")}
+      />
+      <BookingCreateModal
+        open={createBookingOpen}
+        onClose={() => setCreateBookingOpen(false)}
+        onSuccess={() => toast.success("Booking requested")}
+      />
+      <UploadModal
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        mode="file"
+        onUploadComplete={() => toast.success("Files uploaded")}
+      />
+
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -148,6 +180,22 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Quick Actions Toolbar */}
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={() => setCreateTaskOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Task
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setCreateBookingOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Booking
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setUploadOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Upload File
+          </Button>
+        </div>
+
         {/* No Entities State */}
         {!entitiesLoading && entities.length === 0 && (
           <Alert className="bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-800">
@@ -195,51 +243,80 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* Features Hub - Full Width */}
+        {/* Features Hub */}
         <FeaturesHub entityId={primaryEntity?.id} />
 
-        {/* Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Widgets */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Entity Selector */}
+        {/* Widget Grid */}
+        <WidgetGrid>
+          {/* Column 1 */}
+          <div className="space-y-6">
+            <TasksSummaryWidget
+              tasks={dashboardData.tasks}
+              loading={dashboardLoading}
+              error={dashboardError ? "Failed to load tasks" : undefined}
+            />
+            <ActivityFeedWidget
+              activities={dashboardData.activity}
+              loading={dashboardLoading}
+              error={dashboardError ? "Failed to load activity" : undefined}
+            />
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-6">
+            <BookingsCalendarWidget
+              bookings={dashboardData.bookings}
+              loading={dashboardLoading}
+              error={dashboardError ? "Failed to load bookings" : undefined}
+            />
+            <ComplianceTrackerWidget
+              items={dashboardData.compliance}
+              loading={dashboardLoading}
+              error={dashboardError ? "Failed to load compliance" : undefined}
+            />
+          </div>
+
+          {/* Column 3 */}
+          <div className="space-y-6">
+            <OutstandingInvoicesWidget
+              invoices={dashboardData.invoices}
+              totalOutstanding={dashboardData.totalOutstanding}
+              loading={dashboardLoading}
+              error={dashboardError ? "Failed to load invoices" : undefined}
+            />
+
+            {/* Entity Selector Widget */}
             {entities.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Your Entities</CardTitle>
+                  <CardTitle className="text-base">Your Entities</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     {entities.map((entity) => (
                       <button
                         key={entity.id}
                         onClick={() => router.push(`/portal/entities/${entity.id}`)}
-                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition text-left"
+                        className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition text-left"
                       >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                              <span>{countryFlags[entity.country] || "🌍"}</span>
-                              {entity.name}
-                            </div>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                              {entity.country}
-                            </p>
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                            <span>{countryFlags[entity.country] || "🌍"}</span>
+                            {entity.name}
                           </div>
                           <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              entity.status === "ACTIVE"
+                            className={`text-[10px] px-1.5 py-0.5 rounded ${entity.status === "ACTIVE"
                                 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
                                 : "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-                            }`}
+                              }`}
                           >
                             {entity.status}
                           </span>
                         </div>
                       </button>
                     ))}
-                    <Link href="/portal/entities/new" className="h-full">
-                      <button className="w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                    <Link href="/portal/entities/new" className="block">
+                      <button className="w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center justify-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Entity
                       </button>
@@ -248,89 +325,8 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             )}
-
-            {/* Upcoming Compliance */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
-                <Link href="/portal/compliance">
-                  <Button variant="ghost" size="sm">
-                    View All
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                {upcomingCompliance.length > 0 ? (
-                  <div className="space-y-3">
-                    {upcomingCompliance.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-start gap-4 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
-                        onClick={() => router.push(`/portal/compliance/${item.id}`)}
-                      >
-                        <div className="flex-shrink-0">
-                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-white">{item.type}</p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                            Due {new Date(item.dueAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span
-                          className={`flex-shrink-0 text-xs px-2 py-1 rounded font-medium ${
-                            item.priority === "high"
-                              ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-                              : item.priority === "medium"
-                              ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
-                              : "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                          }`}
-                        >
-                          {item.priority}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-600 dark:text-gray-400 py-8">
-                    No upcoming deadlines
-                  </p>
-                )}
-              </CardContent>
-            </Card>
           </div>
-
-          {/* Right Column: Quick Stats (visible on desktop) */}
-          <div className="space-y-6">
-            {/* Quick Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Active Entities</span>
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {entities.filter((e) => e.status === "ACTIVE").length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Pending Setup</span>
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {entities.filter((e) => e.status === "PENDING").length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Upcoming Filings</span>
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {upcomingCompliance.length}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        </WidgetGrid>
       </main>
     </div>
   );

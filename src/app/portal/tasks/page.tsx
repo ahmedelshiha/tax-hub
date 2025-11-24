@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
-import Link from 'next/link'
 import { useTasksData } from '@/hooks/shared/useTasks'
 import { Task, TaskStatus, TaskPriority } from '@/types/shared/entities/task'
+import { TaskQuickCreateModal, TaskDetailModal, TaskEditModal } from '@/components/portal/modals'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -36,6 +36,21 @@ export default function PortalTasksPage() {
   const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null)
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | null>(null)
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set())
+
+  // Modal states
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task)
+    setDetailModalOpen(true)
+  }
+
+  const handleTaskUpdate = () => {
+    window.location.reload()
+  }
 
   // Filter tasks based on search and filters
   const filteredTasks = useMemo(() => {
@@ -132,12 +147,10 @@ export default function PortalTasksPage() {
             {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} to manage
           </p>
         </div>
-        <Link href="/portal/tasks/new">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Task
-          </Button>
-        </Link>
+        <Button onClick={() => setCreateModalOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          New Task
+        </Button>
       </div>
 
       {/* Alert Section */}
@@ -281,14 +294,18 @@ export default function PortalTasksPage() {
             {filteredTasks.length > 0 ? (
               <div className="grid gap-3">
                 {filteredTasks.map((task) => (
-                  <Link key={task.id} href={`/portal/tasks/${task.id}`}>
+                  <div
+                    key={task.id}
+                    onClick={() => handleTaskClick(task)}
+                    className="cursor-pointer"
+                  >
                     <TaskCard
                       data={task}
                       variant="portal"
-                      onClick={() => { }}
+                      onClick={() => handleTaskClick(task)}
                       showActions={false}
                     />
-                  </Link>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -322,14 +339,18 @@ export default function PortalTasksPage() {
               {statusTasks.length > 0 ? (
                 <div className="grid gap-3">
                   {statusTasks.map((task) => (
-                    <Link key={task.id} href={`/portal/tasks/${task.id}`}>
+                    <div
+                      key={task.id}
+                      onClick={() => handleTaskClick(task)}
+                      className="cursor-pointer"
+                    >
                       <TaskCard
                         data={task}
                         variant="portal"
-                        onClick={() => { }}
+                        onClick={() => handleTaskClick(task)}
                         showActions={false}
                       />
-                    </Link>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -346,9 +367,9 @@ export default function PortalTasksPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-gray-600 mb-4">No tasks yet</p>
-            <Link href="/portal/tasks/new">
-              <Button>Create First Task</Button>
-            </Link>
+            <Button onClick={() => setCreateModalOpen(true)}>
+              Create First Task
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -362,6 +383,33 @@ export default function PortalTasksPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modals */}
+      <TaskQuickCreateModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={handleTaskUpdate}
+      />
+
+      <TaskDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false)
+          setSelectedTask(null)
+        }}
+        task={selectedTask}
+        onUpdate={handleTaskUpdate}
+      />
+
+      <TaskEditModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false)
+          setSelectedTask(null)
+        }}
+        task={selectedTask}
+        onSuccess={handleTaskUpdate}
+      />
     </div>
   )
 }
