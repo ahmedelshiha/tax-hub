@@ -219,6 +219,26 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Dashboard Error State */}
+        {dashboardError && (
+          <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <AlertDescription className="text-red-900 dark:text-red-200">
+              <div className="font-semibold mb-1">Unable to load dashboard</div>
+              <p className="text-sm mb-3">
+                {dashboardError.message || "We encountered an error loading your dashboard. Please try refreshing the page."}
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40"
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Quick Actions Toolbar */}
         <div className="flex flex-wrap gap-2">
           <Button size="sm" onClick={() => setCreateTaskOpen(true)}>
