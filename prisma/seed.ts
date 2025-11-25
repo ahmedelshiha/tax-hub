@@ -1162,73 +1162,77 @@ Effective cash flow management requires ongoing attention and planning. Regular 
     console.warn('Skipping direct messages seed:', (e as any)?.message || 'Table not found')
   }
 
-  // Chat Messages
-  const chatMessages = [
-    {
-      id: 'chat_1',
-      tenantId: defaultTenant.id,
-      userId: admin.id,
-      userName: admin.name || 'Admin',
-      role: 'ADMIN',
-      text: 'Welcome to the team channel! This is where we discuss general project updates.',
-      room: 'general',
-    },
-    {
-      id: 'chat_2',
-      tenantId: defaultTenant.id,
-      userId: staff.id,
-      userName: staff.name || 'Staff',
-      role: 'TEAM_MEMBER',
-      text: 'Thanks for the welcome! Looking forward to collaborating with everyone.',
-      room: 'general',
-    },
-    {
-      id: 'chat_3',
-      tenantId: defaultTenant.id,
-      userId: lead.id,
-      userName: lead.name || 'Lead',
-      role: 'TEAM_LEAD',
-      text: 'Don\'t forget that the quarterly review meeting is scheduled for next Friday at 2 PM.',
-      room: 'general',
-    },
-    {
-      id: 'chat_4',
-      tenantId: defaultTenant.id,
-      userId: admin.id,
-      userName: admin.name || 'Admin',
-      role: 'ADMIN',
-      text: 'Great reminder. I\'ll send out the meeting details to everyone.',
-      room: 'general',
-    },
-    {
-      id: 'chat_5',
-      tenantId: defaultTenant.id,
-      userId: staff.id,
-      userName: staff.name || 'Staff',
-      role: 'TEAM_MEMBER',
-      text: 'Quick question about the new client onboarding process.',
-      room: 'operations',
-    },
-    {
-      id: 'chat_6',
-      tenantId: defaultTenant.id,
-      userId: lead.id,
-      userName: lead.name || 'Lead',
-      role: 'TEAM_LEAD',
-      text: 'Sure, what would you like to know?',
-      room: 'operations',
-    },
-  ]
+  // Chat Messages (optional - may not be present in all schemas)
+  try {
+    const chatMessages = [
+      {
+        id: 'chat_1',
+        tenantId: defaultTenant.id,
+        userId: admin.id,
+        userName: admin.name || 'Admin',
+        role: 'ADMIN',
+        text: 'Welcome to the team channel! This is where we discuss general project updates.',
+        room: 'general',
+      },
+      {
+        id: 'chat_2',
+        tenantId: defaultTenant.id,
+        userId: staff.id,
+        userName: staff.name || 'Staff',
+        role: 'TEAM_MEMBER',
+        text: 'Thanks for the welcome! Looking forward to collaborating with everyone.',
+        room: 'general',
+      },
+      {
+        id: 'chat_3',
+        tenantId: defaultTenant.id,
+        userId: lead.id,
+        userName: lead.name || 'Lead',
+        role: 'TEAM_LEAD',
+        text: 'Don\'t forget that the quarterly review meeting is scheduled for next Friday at 2 PM.',
+        room: 'general',
+      },
+      {
+        id: 'chat_4',
+        tenantId: defaultTenant.id,
+        userId: admin.id,
+        userName: admin.name || 'Admin',
+        role: 'ADMIN',
+        text: 'Great reminder. I\'ll send out the meeting details to everyone.',
+        room: 'general',
+      },
+      {
+        id: 'chat_5',
+        tenantId: defaultTenant.id,
+        userId: staff.id,
+        userName: staff.name || 'Staff',
+        role: 'TEAM_MEMBER',
+        text: 'Quick question about the new client onboarding process.',
+        room: 'operations',
+      },
+      {
+        id: 'chat_6',
+        tenantId: defaultTenant.id,
+        userId: lead.id,
+        userName: lead.name || 'Lead',
+        role: 'TEAM_LEAD',
+        text: 'Sure, what would you like to know?',
+        room: 'operations',
+      },
+    ]
 
-  for (const chat of chatMessages) {
-    await prisma.chatMessage.upsert({
-      where: { id: chat.id },
-      update: { text: chat.text, room: chat.room },
-      create: chat,
-    })
+    for (const chat of chatMessages) {
+      await prisma.chatMessage.upsert({
+        where: { id: chat.id },
+        update: { text: chat.text, room: chat.room },
+        create: chat,
+      })
+    }
+
+    console.log('✅ Chat messages created')
+  } catch (e) {
+    console.warn('Skipping chat messages seed:', (e as any)?.message || 'Table not found')
   }
-
-  console.log('✅ Chat messages created')
 
   // Create task templates
   const templates = [
