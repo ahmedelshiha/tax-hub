@@ -130,6 +130,8 @@ model User {
   signatureRequestsRequested DocumentSignatureRequest[] @relation("SignatureRequestRequester")
   signatureRequestsAssigned  DocumentSignatureRequest[] @relation("SignatureRequestSigner")
   documentSignatures        DocumentSignature[]     @relation("DocumentSigner")
+  sentMessages              Message[]               @relation("SentMessages")
+  receivedMessages          Message[]               @relation("ReceivedMessages")
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
@@ -404,6 +406,7 @@ model Tenant {
   documentSignatureRequests DocumentSignatureRequest[]
   documentSignatures    DocumentSignature[]
   analysisJobs          AnalysisJob[]
+  messages              Message[]
 
   @@index([status])
 }
@@ -3239,6 +3242,38 @@ model NotificationPreference {
 
   @@index([tenantId])
   @@map("notification_preferences")
+}
+
+// ============================================================================
+// Message System Models
+// ============================================================================
+
+model Message {
+  id          String   @id @default(cuid())
+  tenantId    String
+  threadId    String?  // For grouping conversation threads
+  senderId    String
+  recipientId String
+  subject     String?  @db.VarChar(255)
+  body        String   @db.Text
+  attachments Json?    // Array of file metadata
+  status      String   @default("sent") @db.VarChar(20) // sent, delivered, read, deleted
+  readAt      DateTime?
+  deletedBy   String?  // Soft delete tracking
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient   User     @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, recipientId, status])
+  @@index([threadId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, senderId])
+  @@map("messages")
 }
 
 // ============================================================================
