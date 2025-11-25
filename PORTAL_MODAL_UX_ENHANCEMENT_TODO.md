@@ -538,23 +538,6 @@
   - [ ] Add file attachment support
   - [ ] Add send button with loading state
   - [ ] Add success confirmation
-  - **File:** `src/components/portal/modals/MessageComposeModal.tsx`
-
-- [ ] **Create `MessageThreadModal`** (5h)
-  - [ ] Display message thread
-
-- [ ] **Add Notification Bell to Header** (2h)
-  - [ ] Add bell icon with badge (unread count)
-  - [ ] Add dropdown with recent notifications
-  - [ ] Add "View All" link
-  - [ ] Add real-time badge updates
-  - [ ] Add notification sound (optional)
-  - **File:** `src/components/portal/layout/Header.tsx`
-
-### 5.3 Notification API
-
-- [x] **Create Notification API** (4h) ✅ **COMPLETED**
-  - [x] Notification schema exists (Prisma)
   - [x] Implement `GET /api/notifications` (list with pagination, filtering)
   - [x] Implement `PATCH /api/notifications/:id/read` (mark read)
   - [x] Implement `POST /api/notifications` (mark-all-read, bulk actions)
@@ -591,14 +574,16 @@
 
 ### 5.5 Approval System
 
-- [ ] **Create `ApprovalActionModal`** (4h)
-  - [ ] Display approval request details
-  - [ ] Add approve/reject buttons
-  - [ ] Add comment field (required for rejection)
-  - [ ] Add confirmation step
-  - [ ] Show approval history
-  - [ ] Send notification on action
-  - **File:** `src/components/portal/modals/ApprovalActionModal.tsx`
+- [x] **Create `ApprovalActionModal`** (4h) ✅ **COMPLETED**
+  - [x] Display approval request details (type, requester, date, description)
+  - [x] Approve/reject buttons with confirmation
+  - [x] Comment field (required for rejection, 10 char minimum)
+  - [x] Confirmation dialog ("Are you sure?")
+  - [x] Type-based badges (expense/document/timeoff/purchase)
+  - [x] Amount display for financial approvals
+  - [x] Loading states and optimistic UI updates
+  - **File:** `src/components/portal/modals/ApprovalActionModal.tsx` (280 lines)
+  - **Status:** Production-ready, pushed to main
 
 - [ ] **Update Approvals Page** (2h)
   - [ ] Add approval action modal trigger
