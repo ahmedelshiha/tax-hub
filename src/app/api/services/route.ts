@@ -50,12 +50,30 @@ const getCachedServices = withCache<any>(
     tenantAware: true,
   },
   async (request: NextRequest): Promise<any> => {
-    const ctx = requireTenantContext()
+    // Handle optional authentication - matches GET handler pattern (lines 106-111)
+    let ctx: any = null
+    try {
+      ctx = requireTenantContext()
+    } catch {
+      // Service catalog can be viewed without authentication
+      ctx = { tenantId: null, userId: null, role: 'PUBLIC' }
+    }
+
     const sp = new URL(request.url).searchParams
+
+    // Convert featured query param from boolean string to enum value
+    const featuredParam = sp.get('featured')
+    let featuredValue: 'all' | 'featured' | 'non-featured' = 'all'
+    if (featuredParam === 'true' || featuredParam === 'featured') {
+      featuredValue = 'featured'
+    } else if (featuredParam === 'false' || featuredParam === 'non-featured') {
+      featuredValue = 'non-featured'
+    }
+
     const filters = ServiceFiltersSchema.parse({
       search: sp.get('search') || undefined,
       category: sp.get('category') || 'all',
-      featured: (sp.get('featured') as any) || 'all',
+      featured: featuredValue,
       status: (sp.get('status') as any) || 'all',
       limit: sp.get('limit') ? Number(sp.get('limit')) : 20,
       offset: sp.get('offset') ? Number(sp.get('offset')) : 0,
@@ -81,6 +99,7 @@ const getCachedServices = withCache<any>(
     return result
   }
 )
+
 
 /**
  * GET /api/services
