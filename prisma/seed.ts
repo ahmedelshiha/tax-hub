@@ -821,16 +821,16 @@ Effective cash flow management requires ongoing attention and planning. Regular 
 
   // Support & Knowledge Base
   const kbCategories = [
-    { id: 'kb_cat_1', name: 'Tax Guides', slug: 'tax-guides', description: 'Comprehensive guides on tax topics', tenantId: defaultTenant.id, displayOrder: 1 },
-    { id: 'kb_cat_2', name: 'Portal Help', slug: 'portal-help', description: 'Help articles for using the client portal', tenantId: defaultTenant.id, displayOrder: 2 },
-    { id: 'kb_cat_3', name: 'Accounting Basics', slug: 'accounting-basics', description: 'Introduction to accounting concepts', tenantId: defaultTenant.id, displayOrder: 3 },
-    { id: 'kb_cat_4', name: 'Compliance', slug: 'compliance', description: 'Compliance and regulatory information', tenantId: defaultTenant.id, displayOrder: 4 },
+    { id: 'kb_cat_1', name: 'Tax Guides', slug: 'tax-guides', description: 'Comprehensive guides on tax topics', tenantId: defaultTenant.id, order: 1 },
+    { id: 'kb_cat_2', name: 'Portal Help', slug: 'portal-help', description: 'Help articles for using the client portal', tenantId: defaultTenant.id, order: 2 },
+    { id: 'kb_cat_3', name: 'Accounting Basics', slug: 'accounting-basics', description: 'Introduction to accounting concepts', tenantId: defaultTenant.id, order: 3 },
+    { id: 'kb_cat_4', name: 'Compliance', slug: 'compliance', description: 'Compliance and regulatory information', tenantId: defaultTenant.id, order: 4 },
   ]
 
   for (const cat of kbCategories) {
     await prisma.knowledgeBaseCategory.upsert({
       where: { id: cat.id },
-      update: { ...cat, id: undefined },
+      update: { name: cat.name, slug: cat.slug, description: cat.description, order: cat.order },
       create: cat,
     })
   }
@@ -845,11 +845,13 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'Understanding Quarterly Tax Payments',
       slug: 'quarterly-tax-payments',
       content: 'Quarterly tax payments are required if you expect to owe $1,000 or more in taxes. Learn how to calculate and submit your estimated tax payments.',
+      excerpt: 'Learn how to calculate and submit quarterly tax payments correctly.',
       authorId: admin.id,
       published: true,
-      views: 245,
-      helpfulVotes: 18,
-      displayOrder: 1,
+      featured: false,
+      viewCount: 245,
+      helpfulCount: 18,
+      tags: ['tax', 'quarterly', 'payments'],
     },
     {
       id: 'kb_art_2',
@@ -858,11 +860,13 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'Deductions vs Credits: What\'s the Difference?',
       slug: 'deductions-vs-credits',
       content: 'Understanding the difference between tax deductions and tax credits is essential for maximizing your tax savings. Deductions reduce your taxable income, while credits directly reduce your tax liability.',
+      excerpt: 'Understand the key differences between tax deductions and credits.',
       authorId: admin.id,
       published: true,
-      views: 189,
-      helpfulVotes: 14,
-      displayOrder: 2,
+      featured: false,
+      viewCount: 189,
+      helpfulCount: 14,
+      tags: ['tax', 'deductions', 'credits'],
     },
     {
       id: 'kb_art_3',
@@ -871,11 +875,13 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'How to Upload Documents to Your Portal',
       slug: 'upload-documents-portal',
       content: 'Follow these simple steps to upload your financial documents to the client portal for easy sharing with your accountant.',
+      excerpt: 'Step-by-step guide to uploading documents to your portal.',
       authorId: staff.id,
       published: true,
-      views: 567,
-      helpfulVotes: 52,
-      displayOrder: 1,
+      featured: false,
+      viewCount: 567,
+      helpfulCount: 52,
+      tags: ['portal', 'documents', 'upload'],
     },
     {
       id: 'kb_art_4',
@@ -884,11 +890,13 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'Viewing Your Financial Reports',
       slug: 'viewing-reports',
       content: 'Learn how to access and interpret your financial reports in the portal, including income statements, balance sheets, and cash flow summaries.',
+      excerpt: 'Learn to access and interpret your financial reports.',
       authorId: staff.id,
       published: true,
-      views: 423,
-      helpfulVotes: 35,
-      displayOrder: 2,
+      featured: false,
+      viewCount: 423,
+      helpfulCount: 35,
+      tags: ['portal', 'reports', 'financial'],
     },
     {
       id: 'kb_art_5',
@@ -897,11 +905,13 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'What is Bookkeeping?',
       slug: 'what-is-bookkeeping',
       content: 'Bookkeeping is the process of recording, classifying, and organizing all financial transactions of a business. It\'s the foundation of good financial management.',
+      excerpt: 'Introduction to bookkeeping and its importance.',
       authorId: admin.id,
       published: true,
-      views: 312,
-      helpfulVotes: 28,
-      displayOrder: 1,
+      featured: false,
+      viewCount: 312,
+      helpfulCount: 28,
+      tags: ['bookkeeping', 'accounting', 'basics'],
     },
     {
       id: 'kb_art_6',
@@ -910,19 +920,30 @@ Effective cash flow management requires ongoing attention and planning. Regular 
       title: 'GDPR Compliance Requirements',
       slug: 'gdpr-compliance',
       content: 'General Data Protection Regulation (GDPR) imposes strict requirements on how you handle personal data. Learn about your compliance obligations.',
+      excerpt: 'Overview of GDPR compliance requirements.',
       authorId: admin.id,
       published: true,
-      views: 178,
-      helpfulVotes: 12,
-      displayOrder: 1,
+      featured: false,
+      viewCount: 178,
+      helpfulCount: 12,
+      tags: ['compliance', 'gdpr', 'data-protection'],
     },
   ]
 
   for (const article of kbArticles) {
     await prisma.knowledgeBaseArticle.upsert({
       where: { id: article.id },
-      update: { ...article, id: undefined },
-      create: article as any,
+      update: {
+        title: article.title,
+        content: article.content,
+        excerpt: article.excerpt,
+        published: article.published,
+        featured: article.featured,
+        viewCount: article.viewCount,
+        helpfulCount: article.helpfulCount,
+        tags: article.tags,
+      },
+      create: article,
     })
   }
 
@@ -2313,7 +2334,7 @@ Effective cash flow management requires ongoing attention and planning. Regular 
     })
   }
 
-  console.log('✅ Workflow templates created')
+  console.log('��� Workflow templates created')
 
   // User Workflows
   const userWorkflows = [
