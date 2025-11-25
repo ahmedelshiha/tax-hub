@@ -242,7 +242,7 @@ export function ApprovalActionModal({
                             Are you sure you want to {action} this approval request?
                             {action === 'reject' && comment && (
                                 <span className="block mt-2 text-sm text-gray-700 dark:text-gray-300">
-                                    Your reason: "{comment}"
+                                    Your reason: &quot;{comment}&quot;
                                 </span>
                             )}
                             This action cannot be undone.
