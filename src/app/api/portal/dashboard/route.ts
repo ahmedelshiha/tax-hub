@@ -14,22 +14,15 @@ export const GET = withTenantContext(async (req: NextRequest) => {
     const userId = ctx?.userId;
 
     try {
-        // Fetch all data in parallel with error handling
-        // Each query is wrapped to provide empty results on failure
-        const [
-            tasks,
-            bookings,
-            invoices,
-            compliance,
-            activity,
-            invoiceAgg
-        ] = await Promise.all([
+        // Fetch all data in parallel with graceful fallbacks
+        // Use Promise.allSettled to prevent one failure from blocking all data
+        const results = await Promise.allSettled([
             // 1. Pending Tasks
             prisma.task.findMany({
                 where: {
                     tenantId,
                     status: { not: 'COMPLETED' },
-                    assigneeId: userId // Only show tasks assigned to the user? Or all tenant tasks? Let's show assigned or created by for now.
+                    assigneeId: userId
                 },
                 orderBy: { dueAt: 'asc' },
                 take: 5,
@@ -40,13 +33,13 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                     dueAt: true,
                     status: true
                 }
-            }),
+            }).catch(() => []),
 
             // 2. Upcoming Bookings
             prisma.booking.findMany({
                 where: {
                     tenantId,
-                    clientId: userId || undefined, // Ensure not null
+                    clientId: userId || undefined,
                     status: { in: ['PENDING', 'CONFIRMED'] },
                     scheduledAt: { gte: new Date() }
                 },
@@ -57,13 +50,13 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                         select: { name: true }
                     }
                 }
-            }) as Promise<Array<any>>, // Cast to any to bypass inference issues with Promise.all and includes
+            }).catch(() => []),
 
             // 3. Outstanding Invoices
             prisma.invoice.findMany({
                 where: {
                     tenantId,
-                    clientId: userId, // Show invoices for the current user
+                    clientId: userId,
                     status: 'UNPAID'
                 },
                 orderBy: { createdAt: 'desc' },
@@ -72,10 +65,10 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                     id: true,
                     number: true,
                     totalCents: true,
-                    createdAt: true, // Using createdAt as proxy for due date if not available
+                    createdAt: true,
                     status: true
                 }
-            }),
+            }).catch(() => []),
 
             // 4. Compliance Records
             prisma.complianceRecord.findMany({
@@ -89,16 +82,15 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                     id: true,
                     type: true,
                     dueAt: true,
-                    status: true,
-                    // ComplianceRecord doesn't have priority, so we'll infer or omit
+                    status: true
                 }
-            }),
+            }).catch(() => []),
 
             // 5. Recent Activity
             prisma.auditLog.findMany({
                 where: {
                     tenantId,
-                    userId // Show activity for this user
+                    userId
                 },
                 orderBy: { createdAt: 'desc' },
                 take: 5,
@@ -111,7 +103,7 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                         select: { name: true }
                     }
                 }
-            }),
+            }).catch(() => []),
 
             // 6. Invoice Aggregation
             prisma.invoice.aggregate({
@@ -123,8 +115,16 @@ export const GET = withTenantContext(async (req: NextRequest) => {
                 _sum: {
                     totalCents: true
                 }
-            })
+            }).catch(() => ({ _sum: { totalCents: null } }))
         ]);
+
+        // Extract values from settled promises
+        const tasks = results[0].status === 'fulfilled' ? results[0].value : [];
+        const bookings = results[1].status === 'fulfilled' ? results[1].value : [];
+        const invoices = results[2].status === 'fulfilled' ? results[2].value : [];
+        const compliance = results[3].status === 'fulfilled' ? results[3].value : [];
+        const activity = results[4].status === 'fulfilled' ? results[4].value : [];
+        const invoiceAgg = results[5].status === 'fulfilled' ? results[5].value : { _sum: { totalCents: null } };
 
         // Transform data for frontend
         const dashboardData = {
