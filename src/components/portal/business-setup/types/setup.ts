@@ -63,3 +63,41 @@ export interface SetupContextType {
     setShowHelpPanel: (show: boolean) => void
   }
 }
+
+export type Country = "AE" | "SA" | "EG"
+
+export interface TabProps {
+  onError: (message: string) => void
+  onComplete: (entityId: string) => void
+  isLoading: boolean
+  setIsLoading: (loading: boolean) => void
+}
+
+export type BusinessType = 'existing' | 'new' | 'individual'
+
+export interface SetupWizardProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onComplete?: (entityId: string) => void
+}
+
+export interface EconomicZone {
+  id: string
+  name: string
+  country: Country
+}
+
+export interface LegalForm {
+  id: string
+  name: string
+  country: Country
+}
+
+export interface LicenseLookupResult {
+  found: boolean
+  businessName?: string
+  licenseNumber?: string
+  expiryDate?: string
+  activities?: string[]
+  [key: string]: any
+}

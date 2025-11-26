@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         })
 
         if (format === 'csv') {
-            const csvContent = generateCSV(tasks, csvPresets.tasks)
+            const csvContent = generateCSV(tasks, csvPresets.tasks as any)
             return new NextResponse(csvContent, {
                 headers: {
                     'Content-Type': 'text/csv',

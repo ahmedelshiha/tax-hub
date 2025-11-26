@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         }))
 
         if (format === 'csv') {
-            const csvContent = generateCSV(exportData, csvPresets.compliance)
+            const csvContent = generateCSV(exportData, csvPresets.compliance as any)
             return new NextResponse(csvContent, {
                 headers: {
                     'Content-Type': 'text/csv',

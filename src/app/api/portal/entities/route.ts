@@ -34,7 +34,6 @@ export async function GET(request: NextRequest) {
                 id: true,
                 name: true,
                 status: true,
-                taxId: true,
                 country: true,
             },
             orderBy: {
