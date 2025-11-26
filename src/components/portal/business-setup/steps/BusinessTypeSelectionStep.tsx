@@ -69,7 +69,7 @@ export default function BusinessTypeSelectionStep() {
                 { field: 'businessType', message: 'Please select a business type' }
             ])
         }
-    }, [formData.businessType, actions])
+    }, [formData.businessType])
 
     const handleTypeSelect = (type: BusinessType) => {
         actions.updateFormData({ businessType: type })

@@ -17,7 +17,7 @@ export default function CountrySelectionStep() {
                 { field: 'country', message: 'Please select a country' }
             ])
         }
-    }, [formData.country, actions])
+    }, [formData.country])
 
     const handleCountrySelect = (country: string) => {
         actions.updateFormData({ country })

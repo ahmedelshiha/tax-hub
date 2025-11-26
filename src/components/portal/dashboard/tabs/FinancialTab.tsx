@@ -102,7 +102,7 @@ export default function FinancialTab() {
                     : ('secondary' as const)
         },
         href: `/portal/invoicing/${invoice.id}`,
-        metadata: `$${invoice.amount.toLocaleString()} • Due ${formatDistanceToNow(new Date(invoice.dueDate), { addSuffix: true })}`
+        metadata: `$${(invoice.amount || 0).toLocaleString()} • Due ${invoice.dueDate ? formatDistanceToNow(new Date(invoice.dueDate), { addSuffix: true }) : 'N/A'}`
     }))
 
     const formatCurrency = (amount: number) => {

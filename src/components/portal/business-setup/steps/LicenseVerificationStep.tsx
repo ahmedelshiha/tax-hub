@@ -26,7 +26,7 @@ export default function LicenseVerificationStep() {
             actions.clearValidationErrors()
             actions.markStepComplete(3)
         }
-    }, [formData.licenseNumber, formData.businessName, isExisting, actions])
+    }, [formData.licenseNumber, formData.businessName, isExisting])
 
     const handleLicenseLookup = useCallback(async () => {
         if (!formData.licenseNumber || !formData.country) return

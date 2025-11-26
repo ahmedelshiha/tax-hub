@@ -15,15 +15,15 @@ export default function ReviewConfirmStep() {
             actions.clearValidationErrors()
             actions.markStepComplete(6)
         }
-    }, [formData.termsAccepted, actions])
+    }, [formData.termsAccepted])
 
     const Section = ({ title, step, children }: { title: string, step: number, children: React.ReactNode }) => (
         <Card className="mb-4">
             <CardHeader className="py-3 px-4 flex flex-row items-center justify-between bg-gray-50 dark:bg-gray-900/50 border-b">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
+                <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-8 text-xs"
                     onClick={() => actions.goToStep(step)}
                 >
@@ -101,8 +101,8 @@ export default function ReviewConfirmStep() {
             </div>
 
             <div className="flex justify-center mt-6">
-                <Button 
-                    size="lg" 
+                <Button
+                    size="lg"
                     className="w-full md:w-1/2 bg-green-600 hover:bg-green-700"
                     onClick={() => actions.submitSetup()}
                     disabled={!formData.termsAccepted}
