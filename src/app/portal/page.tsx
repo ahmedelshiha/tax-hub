@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Bell } from "lucide-react";
 import { usePortalActiveTab, usePortalLayoutActions } from "@/stores/portal/layout.store";
-import { SetupWizard } from "@/components/portal/business-setup";
+import SetupWizard from "@/components/portal/business-setup/core/SetupOrchestrator";
 import { GlobalSearchModal } from "@/components/portal/GlobalSearchModal";
 import EntitySwitcher from "@/components/portal/layout/EntitySwitcher";
 import { toast } from "sonner";
