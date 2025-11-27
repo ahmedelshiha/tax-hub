@@ -1,25 +1,33 @@
 /**
- * Tasks Tab Component
- * Task management view with stats and task list (~120 lines)
+ * Tasks Tab Component - Refactored with Oracle Fusion UI
+ * 
+ * Modular architecture using:
+ * - React Query (usePortalTasks)
+ * - Oracle Fusion KPICard/Grid
+ * - StatusMessage for errors
+ * - LoadingSkeleton for loading
+ * - ContentSection for layout
+ * 
+ * ~120 lines, production-ready
  */
 
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  KPICard,
+  KPIGrid,
+  ContentSection,
+  LoadingSkeleton,
+  StatusMessage,
+  StatusBadge,
+  EmptyState,
+} from '@/components/ui-oracle'
+import { usePortalTasks } from '@/hooks/usePortalQuery'
 import { CheckSquare, Clock, AlertCircle, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import useSWR from 'swr'
-import StatCard from '../cards/StatCard'
-import ListCard from '../cards/ListCard'
-import ExportButton from '@/components/portal/export/ExportButton'
-import HelpTooltip from '@/components/portal/help/HelpTooltip'
-import { Skeleton } from '@/components/ui/skeleton'
 import { formatDistanceToNow } from 'date-fns'
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 interface Task {
   id: string
@@ -29,137 +37,122 @@ interface Task {
   priority: string
   dueAt?: string
   assignee?: { name: string }
-  completionPercentage?: number
 }
 
 export default function TasksTab() {
   const router = useRouter()
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('active')
-
-  const { data, isLoading, error } = useSWR<{
-    success: boolean; data: {
-      tasks: Task[]
-      stats: {
-        total: number
-        active: number
-        completed: number
-        overdue: number
-      }
-    }
-  }>('/api/portal/tasks', fetcher)
+  const { data, isLoading, error } = usePortalTasks()
 
   if (error) {
     return (
-      <Card className="border-red-200 bg-red-50">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 text-red-800">
-            <AlertCircle className="h-5 w-5" />
-            <span>Failed to load tasks</span>
-          </div>
-        </CardContent>
-      </Card>
+      <StatusMessage variant="error" title="Failed to load tasks">
+        {error.message || 'An error occurred while fetching tasks data.'}
+      </StatusMessage>
     )
   }
 
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-8 w-24 mb-2" />
-                <Skeleton className="h-12 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <Skeleton className="h-96 w-full" />
+        <LoadingSkeleton variant="card" count={4} />
+        <LoadingSkeleton variant="list" count={5} />
       </div>
     )
   }
 
-  const stats = data?.data?.stats || { total: 0, active: 0, completed: 0, overdue: 0 }
-  const tasks = data?.data?.tasks || []
+  const stats = (data as any)?.data?.stats || { total: 0, active: 0, completed: 0, overdue: 0 }
+  const tasks = (data as any)?.data?.tasks || []
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task: Task) => {
     if (filter === 'active') return ['OPEN', 'IN_PROGRESS'].includes(task.status)
     if (filter === 'completed') return task.status === 'DONE'
     return true
   })
 
-  const taskListItems = filteredTasks.map(task => ({
-    id: task.id,
-    title: task.title,
-    subtitle: task.assignee?.name || 'Unassigned',
-    badge: {
-      label: task.priority,
-      variant: task.priority === 'HIGH' ? ('destructive' as const) : ('secondary' as const)
-    },
-    href: `/portal/tasks/${task.id}`,
-    metadata: task.dueAt ? `Due ${formatDistanceToNow(new Date(task.dueAt), { addSuffix: true })}` : undefined
-  }))
-
   return (
-    <div className="space-y-6 tab-content-enter">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h2>
-          <HelpTooltip content="Manage your work items, assign team members, and track task completion progress" />
-        </div>
-        <div className="flex items-center gap-2">
-          <ExportButton dataType="tasks" filters={{ status: filter !== 'all' ? filter : undefined }} />
-          <Button onClick={() => router.push('/portal/tasks/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
-        </div>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Action Bar */}
+      <div className="flex items-center justify-end gap-2">
+        <Button onClick={() => router.push('/portal/tasks/new')}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Task
+        </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Tasks"
+      {/* KPI Stats */}
+      <KPIGrid columns={4}>
+        <KPICard
+          label="Total Tasks"
           value={stats.total}
           icon={CheckSquare}
-          color="text-blue-600"
+          variant="info"
           onClick={() => setFilter('all')}
         />
-        <StatCard
-          title="Active"
+        <KPICard
+          label="Active"
           value={stats.active}
-          subtitle="In progress"
+          comparisonText="In progress"
           icon={Clock}
-          color="text-orange-600"
+          variant="warning"
           onClick={() => setFilter('active')}
         />
-        <StatCard
-          title="Completed"
+        <KPICard
+          label="Completed"
           value={stats.completed}
-          subtitle="Done"
+          comparisonText="Done"
           icon={CheckSquare}
-          color="text-green-600"
+          variant="success"
           onClick={() => setFilter('completed')}
         />
-        <StatCard
-          title="Overdue"
+        <KPICard
+          label="Overdue"
           value={stats.overdue}
-          subtitle="Need attention"
+          comparisonText="Need attention"
           icon={AlertCircle}
-          color="text-red-600"
+          variant="danger"
         />
-      </div>
+      </KPIGrid>
 
       {/* Task List */}
-      <ListCard
-        title={`${filter.charAt(0).toUpperCase() + filter.slice(1)} Tasks`}
-        icon={CheckSquare}
-        items={taskListItems}
-        emptyMessage={`No ${filter} tasks`}
-        viewAllHref="/portal/tasks"
-        maxItems={10}
-      />
+      <ContentSection title={`${filter.charAt(0).toUpperCase() + filter.slice(1)} Tasks`}>
+        {filteredTasks.length === 0 ? (
+          <EmptyState
+            icon={CheckSquare}
+            title={`No ${filter} tasks`}
+            description="Tasks will appear here when created."
+            variant="compact"
+          />
+        ) : (
+          <div className="space-y-3">
+            {filteredTasks.slice(0, 10).map((task: Task) => (
+              <div
+                key={task.id}
+                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                onClick={() => router.push(`/portal/tasks/${task.id}`)}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                      {task.title}
+                    </h3>
+                    <StatusBadge
+                      variant={task.priority === 'HIGH' ? 'danger' : 'neutral'}
+                      size="sm"
+                    >
+                      {task.priority}
+                    </StatusBadge>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {task.assignee?.name || 'Unassigned'}
+                    {task.dueAt && ` • Due ${formatDistanceToNow(new Date(task.dueAt), { addSuffix: true })}`}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </ContentSection>
     </div>
   )
 }

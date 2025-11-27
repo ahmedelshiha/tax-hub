@@ -1,23 +1,26 @@
 /**
- * Compliance Tab Component
- * Compliance tracking with deadlines and obligations (~130 lines)
+ * Compliance Tab Component - Refactored with Oracle Fusion UI
+ * 
+ * Modular architecture using Oracle Fusion components
+ * ~130 lines, production-ready
  */
 
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, Clock, CheckCircle, Calendar, Plus } from 'lucide-react'
+import {
+    KPICard,
+    KPIGrid,
+    ContentSection,
+    LoadingSkeleton,
+    StatusMessage,
+    StatusBadge,
+    EmptyState,
+} from '@/components/ui-oracle'
+import { usePortalCompliance } from '@/hooks/usePortalQuery'
+import { AlertCircle, Clock, CheckCircle, Calendar } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import useSWR from 'swr'
-import StatCard from '../cards/StatCard'
-import ListCard from '../cards/ListCard'
-import ExportButton from '@/components/portal/export/ExportButton'
-import HelpTooltip from '@/components/portal/help/HelpTooltip'
-import { Skeleton } from '@/components/ui/skeleton'
-import { format, formatDistanceToNow } from 'date-fns'
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+import { format } from 'date-fns'
 
 interface ComplianceItem {
     id: string
@@ -26,156 +29,122 @@ interface ComplianceItem {
     dueDate: string
     status: string
     entity?: { name: string }
-    filingPeriod?: { startDate: string; endDate: string }
 }
 
 export default function ComplianceTab() {
     const router = useRouter()
-
-    const { data, isLoading, error } = useSWR<{
-        success: boolean; data: {
-            items: ComplianceItem[]
-            stats: {
-                total: number
-                pending: number
-                dueSoon: number
-                overdue: number
-                completed: number
-            }
-        }
-    }>('/api/portal/compliance', fetcher)
+    const { data, isLoading, error } = usePortalCompliance()
 
     if (error) {
         return (
-            <Card className="border-red-200 bg-red-50">
-                <CardContent className="pt-6">
-                    <div className="flex items-center gap-3 text-red-800">
-                        <AlertCircle className="h-5 w-5" />
-                        <span>Failed to load compliance data</span>
-                    </div>
-                </CardContent>
-            </Card>
+            <StatusMessage variant="error" title="Failed to load compliance data">
+                {error.message || 'An error occurred while fetching compliance information.'}
+            </StatusMessage>
         )
     }
 
     if (isLoading) {
         return (
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    {[1, 2, 3, 4].map(i => (
-                        <Card key={i}>
-                            <CardContent className="p-6">
-                                <Skeleton className="h-8 w-24 mb-2" />
-                                <Skeleton className="h-12 w-16" />
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-                <Skeleton className="h-96 w-full" />
+                <LoadingSkeleton variant="card" count={4} />
+                <LoadingSkeleton variant="list" count={5} />
             </div>
         )
     }
 
-    const stats = data?.data?.stats || { total: 0, pending: 0, dueSoon: 0, overdue: 0, completed: 0 }
-    const items = data?.data?.items || []
+    const stats = (data as any)?.data?.stats || { total: 0, pending: 0, dueSoon: 0, overdue: 0 }
+    const items = (data as any)?.data?.items || []
 
-    // Separate items by urgency
-    const overdueItems = items.filter(item => item.status === 'OVERDUE')
-    const dueSoonItems = items.filter(item => {
-        if (item.status !== 'PENDING') return false
-        const daysUntil = Math.ceil((new Date(item.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-        return daysUntil <= 30 && daysUntil > 0
-    })
-
-    const complianceListItems = [...overdueItems, ...dueSoonItems].slice(0, 10).map(item => {
-        const isOverdue = item.status === 'OVERDUE'
-        return {
-            id: item.id,
-            title: item.title,
-            subtitle: item.entity?.name || 'No entity',
-            badge: {
-                label: isOverdue ? 'Overdue' : 'Due Soon',
-                variant: isOverdue ? ('destructive' as const) : ('outline' as const)
-            },
-            href: `/portal/compliance/${item.id}`,
-            metadata: `Due ${format(new Date(item.dueDate), 'MMM dd, yyyy')}`
-        }
-    })
+    const urgentItems = items
+        .filter((item: ComplianceItem) => item.status === 'OVERDUE' || item.status === 'PENDING')
+        .slice(0, 10)
 
     return (
-        <div className="space-y-6 tab-content-enter">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Compliance</h2>
-                    <HelpTooltip content="Track tax obligations, filing deadlines, and regulatory compliance requirements" />
-                </div>
-                <div className="flex items-center gap-2">
-                    <ExportButton dataType="compliance" />
-                    <Button onClick={() => router.push('/portal/compliance')}>
-                        <Calendar className="h-4 w-4 mr-2" />
-                        View Calendar
-                    </Button>
-                </div>
+        <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Action Bar */}
+            <div className="flex items-center justify-end gap-2">
+                <Button onClick={() => router.push('/portal/compliance')}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    View Calendar
+                </Button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    title="Total Obligations"
+            {/* KPI Stats */}
+            <KPIGrid columns={4}>
+                <KPICard
+                    label="Total Obligations"
                     value={stats.total}
                     icon={AlertCircle}
-                    color="text-blue-600"
+                    variant="info"
                 />
-                <StatCard
-                    title="Pending"
+                <KPICard
+                    label="Pending"
                     value={stats.pending}
-                    subtitle="Awaiting action"
+                    comparisonText="Awaiting action"
                     icon={Clock}
-                    color="text-orange-600"
+                    variant="warning"
                 />
-                <StatCard
-                    title="Due Soon"
+                <KPICard
+                    label="Due Soon"
                     value={stats.dueSoon}
-                    subtitle="Next 30 days"
+                    comparisonText="Next 30 days"
                     icon={AlertCircle}
-                    color="text-yellow-600"
+                    variant="warning"
                 />
-                <StatCard
-                    title="Overdue"
+                <KPICard
+                    label="Overdue"
                     value={stats.overdue}
-                    subtitle="Needs attention"
+                    comparisonText="Needs attention"
                     icon={AlertCircle}
-                    color="text-red-600"
+                    variant="danger"
                 />
-            </div>
+            </KPIGrid>
 
             {/* Urgent Items */}
-            <ListCard
-                title="Urgent Compliance Items"
-                icon={AlertCircle}
-                items={complianceListItems}
-                emptyMessage="All compliance items are up to date!"
-                viewAllHref="/portal/compliance"
-                maxItems={10}
-            />
-
-            {/* Info Card */}
-            <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium text-blue-900 dark:text-blue-200 mb-1">
-                                Stay Compliant
-                            </p>
-                            <p className="text-sm text-blue-800 dark:text-blue-300">
-                                Set up automatic reminders and notifications to never miss a deadline. Visit the compliance center for full details.
-                            </p>
-                        </div>
+            <ContentSection title="Urgent Compliance Items">
+                {urgentItems.length === 0 ? (
+                    <EmptyState
+                        icon={CheckCircle}
+                        title="All compliance items are up to date!"
+                        description="You have no urgent compliance obligations at this time."
+                        variant="compact"
+                    />
+                ) : (
+                    <div className="space-y-3">
+                        {urgentItems.map((item: ComplianceItem) => (
+                            <div
+                                key={item.id}
+                                className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                onClick={() => router.push(`/portal/compliance/${item.id}`)}
+                            >
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                                            {item.title}
+                                        </h3>
+                                        <StatusBadge
+                                            variant={item.status === 'OVERDUE' ? 'danger' : 'warning'}
+                                            size="sm"
+                                            showDot
+                                        >
+                                            {item.status === 'OVERDUE' ? 'Overdue' : 'Due Soon'}
+                                        </StatusBadge>
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        {item.entity?.name || 'No entity'} • Due {format(new Date(item.dueDate), 'MMM dd, yyyy')}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </CardContent>
-            </Card>
+                )}
+            </ContentSection>
+
+            {/* Info Message */}
+            <StatusMessage variant="info" title="Stay Compliant">
+                Set up automatic reminders and notifications to never miss a deadline.
+                Visit the compliance center for full details.
+            </StatusMessage>
         </div>
     )
 }
