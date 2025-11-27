@@ -1,14 +1,37 @@
 /**
  * Portal Layout
- * Applies PortalDashboardLayout to all /portal/* routes
+ * Applies PortalDashboardLayout with all required providers to /portal/* routes
+ * 
+ * Providers:
+ * - SessionProvider: Authentication state
+ * - ThemeProvider: Dark mode support
+ * - QueryProvider: React Query data fetching
  */
 
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import PortalDashboardLayout from '@/components/portal/layout/PortalDashboardLayout'
+import { SessionProvider } from 'next-auth/react'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { QueryProvider } from '@/providers/QueryProvider'
 
-export default function PortalAppLayout({
+export default async function PortalAppLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    return <PortalDashboardLayout>{children}</PortalDashboardLayout>
+    // Get session server-side for initial state
+    const session = await getServerSession(authOptions)
+
+    return (
+        <SessionProvider session={session}>
+            <ThemeProvider defaultTheme="light">
+                <QueryProvider>
+                    <PortalDashboardLayout>
+                        {children}
+                    </PortalDashboardLayout>
+                </QueryProvider>
+            </ThemeProvider>
+        </SessionProvider>
+    )
 }
