@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import NotificationBell from '@/components/portal/layout/NotificationBell'
 import NotificationCenterModal from '@/components/portal/modals/NotificationCenterModal'
-import GlobalSearchModal from '@/components/portal/search/GlobalSearchModal'
+import { GlobalSearchModal } from '@/components/portal/GlobalSearchModal'
 import EntitySwitcher from '@/components/portal/layout/EntitySwitcher'
 
 interface PortalHeaderProps {
@@ -33,6 +33,8 @@ export default function PortalHeader({ onMenuToggle, isMobile = false }: PortalH
 
   // Cmd+K / Ctrl+K shortcut for global search
   useEffect(() => {
+    if (typeof window === 'undefined') return
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()

@@ -66,7 +66,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
     // Load recent searches from localStorage
     useEffect(() => {
-        if (open) {
+        if (open && typeof window !== 'undefined') {
             const stored = localStorage.getItem(RECENT_SEARCHES_KEY)
             if (stored) {
                 try {
@@ -90,7 +90,9 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
         ].slice(0, MAX_RECENT_SEARCHES)
 
         setRecentSearches(updated)
-        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+        if (typeof window !== 'undefined') {
+            localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated))
+        }
     }, [recentSearches])
 
     // Debounced search
@@ -142,7 +144,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
     // Keyboard navigation
     useEffect(() => {
-        if (!open) return
+        if (!open || typeof window === 'undefined') return
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowDown') {
@@ -180,7 +182,9 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
 
     const clearRecentSearches = () => {
         setRecentSearches([])
-        localStorage.removeItem(RECENT_SEARCHES_KEY)
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem(RECENT_SEARCHES_KEY)
+        }
     }
 
     // Group results by type
