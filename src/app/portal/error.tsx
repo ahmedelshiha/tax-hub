@@ -12,8 +12,13 @@ export default function PortalError({
     reset: () => void
 }) {
     useEffect(() => {
-        // Log the error to an error reporting service
-        console.error('Portal Error:', error)
+        // Log the error with full details
+        console.error('[Portal Error Boundary]', {
+            message: error.message,
+            digest: error.digest,
+            stack: error.stack,
+            error
+        })
     }, [error])
 
     return (
