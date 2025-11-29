@@ -15,6 +15,7 @@ export interface EmptyStateProps {
         label: string
         onClick: () => void
     }
+    variant?: 'default' | 'compact'
     className?: string
 }
 
@@ -23,25 +24,47 @@ export function EmptyState({
     title,
     description,
     action,
+    variant = 'default',
     className
 }: EmptyStateProps) {
+    const isCompact = variant === 'compact'
+
     return (
-        <div className={cn('flex flex-col items-center justify-center py-12 text-center', className)}>
+        <div className={cn(
+            'flex flex-col items-center justify-center text-center',
+            isCompact ? 'py-6' : 'py-12',
+            className
+        )}>
             {Icon && (
-                <div className="mb-4 rounded-full bg-gray-100 dark:bg-gray-800 p-4">
-                    <Icon className="h-8 w-8 text-gray-400" />
+                <div className={cn(
+                    'rounded-full bg-gray-100 dark:bg-gray-800',
+                    isCompact ? 'mb-3 p-3' : 'mb-4 p-4'
+                )}>
+                    <Icon className={cn(
+                        'text-gray-400',
+                        isCompact ? 'h-6 w-6' : 'h-8 w-8'
+                    )} />
                 </div>
             )}
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+            <h3 className={cn(
+                'font-semibold text-gray-900 dark:text-white',
+                isCompact ? 'text-base mb-0.5' : 'text-lg mb-1'
+            )}>
                 {title}
             </h3>
             {description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 max-w-sm mb-4">
+                <p className={cn(
+                    'text-gray-600 dark:text-gray-400 max-w-sm',
+                    isCompact ? 'text-xs mb-3' : 'text-sm mb-4'
+                )}>
                     {description}
                 </p>
             )}
             {action && (
-                <Button onClick={action.onClick}>
+                <Button
+                    onClick={action.onClick}
+                    size={isCompact ? 'sm' : 'default'}
+                >
                     {action.label}
                 </Button>
             )}
