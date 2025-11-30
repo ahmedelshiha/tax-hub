@@ -10,9 +10,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search, Bell } from "lucide-react";
 import { usePortalActiveTab, usePortalLayoutActions } from "@/stores/portal/layout.store";
 import SetupWizard from "@/components/portal/business-setup/core/SetupOrchestrator";
-import { GlobalSearchModal } from "@/components/portal/GlobalSearchModal";
 import EntitySwitcher from "@/components/portal/layout/EntitySwitcher";
+import { useModal } from "@/components/providers/ModalProvider";
 import { toast } from "sonner";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 /**
  * Portal Dashboard Page
@@ -55,35 +56,23 @@ function TabLoadingSkeleton() {
 
 export default function PortalDashboardPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   // Tab state from Zustand store
   const activeTab = usePortalActiveTab();
   const { setActiveTab } = usePortalLayoutActions();
+  const { openModal } = useModal();
 
   // Modal states
   const [setupWizardOpen, setSetupWizardOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-
-  // Redirect unauthenticated users
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/login");
-    }
-  }, [status, router]);
 
   // Global search keyboard shortcut (Cmd+K / Ctrl+K)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useKeyboardShortcut({
+    id: 'dashboard-global-search',
+    combo: 'Meta+k',
+    description: 'Open global search',
+    action: () => openModal('global-search')
+  })
 
   // Handle business setup wizard completion
   const handleSetupComplete = (entityId: string) => {
@@ -92,24 +81,6 @@ export default function PortalDashboardPage() {
     router.refresh();
   };
 
-  // Show loading state while checking auth
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center space-y-4">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600 dark:text-gray-400">
-            Loading your dashboard...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render if not authenticated (will redirect)
-  if (status !== "authenticated") {
-    return null;
-  }
 
   return (
     <>
@@ -119,7 +90,6 @@ export default function PortalDashboardPage() {
         onOpenChange={setSetupWizardOpen}
         onComplete={handleSetupComplete}
       />
-      <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
@@ -145,7 +115,7 @@ export default function PortalDashboardPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setSearchOpen(true)}
+                onClick={() => openModal("global-search")}
                 className="hidden sm:flex"
               >
                 <Search className="h-4 w-4 mr-2" />

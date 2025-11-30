@@ -18,6 +18,8 @@ import {
     usePortalLayoutActions
 } from '@/stores/portal/layout.store'
 import { cn } from '@/lib/utils'
+import { PortalLayoutSkeleton } from './PortalLayoutSkeleton'
+import { OfflineIndicator } from '../OfflineIndicator'
 
 interface PortalDashboardLayoutProps {
     children: React.ReactNode
@@ -78,27 +80,7 @@ export default function PortalDashboardLayout({
 
     // Loading skeleton during SSR
     if (!isClient) {
-        return (
-            <div className="h-screen bg-gray-50 dark:bg-gray-900 flex">
-                <div className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <div className="animate-pulse p-4 space-y-4">
-                        <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded" />
-                        <div className="space-y-2">
-                            {[1, 2, 3, 4, 5].map(i => (
-                                <div key={i} className="h-10 bg-gray-200 dark:bg-gray-800 rounded" />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <div className="flex-1">
-                    <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700" />
-                    <div className="p-6 animate-pulse">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4 mb-4" />
-                        <div className="h-32 bg-gray-200 dark:bg-gray-800 rounded" />
-                    </div>
-                </div>
-            </div>
-        )
+        return <PortalLayoutSkeleton />
     }
 
     return (
@@ -156,6 +138,8 @@ export default function PortalDashboardLayout({
                 {/* Footer */}
                 <PortalFooter />
             </div>
+
+            <OfflineIndicator />
         </div>
     )
 }

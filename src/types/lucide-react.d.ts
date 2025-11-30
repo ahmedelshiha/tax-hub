@@ -23,6 +23,7 @@ declare module 'lucide-react' {
     export const Pizza: Icon
     export const Plus: Icon
     export const Settings: Icon
+    export const Settings2: Icon
     export const Sun: Icon
     export const Trash: Icon
     export const Twitter: Icon

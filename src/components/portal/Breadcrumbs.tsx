@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useBreadcrumbs } from "@/components/portal/providers/BreadcrumbProvider";
 
 interface BreadcrumbItem {
     label: string;
@@ -83,11 +84,12 @@ const ROUTE_LABELS: Record<string, string> = {
     edit: "Edit",
 };
 
-export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+export function Breadcrumbs({ items: propItems, className }: BreadcrumbsProps) {
     const pathname = usePathname();
+    const { items: contextItems, dynamicLabels } = useBreadcrumbs();
 
-    // Use custom items or generate from pathname
-    const rawBreadcrumbs = items || generateBreadcrumbs(pathname);
+    // Priority: Prop items > Context items > Generated from pathname
+    const rawBreadcrumbs = propItems || contextItems || generateBreadcrumbs(pathname);
     const breadcrumbs = Array.isArray(rawBreadcrumbs) ? rawBreadcrumbs : [];
 
     // Map breadcrumbs to use friendly labels
@@ -95,9 +97,12 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
         const segments = crumb.href.split("/").filter(Boolean);
         const lastSegment = segments[segments.length - 1];
 
+        // Check for dynamic label override (e.g. ID -> Name)
+        const dynamicLabel = dynamicLabels[lastSegment];
+
         return {
             ...crumb,
-            label: ROUTE_LABELS[lastSegment] || crumb.label,
+            label: dynamicLabel || ROUTE_LABELS[lastSegment] || crumb.label,
         };
     });
 

@@ -27,6 +27,15 @@ import {
     DollarSign,
     AlertCircle,
 } from 'lucide-react'
+import { DashboardCustomizer, WidgetConfig } from '../DashboardCustomizer'
+import { usePortalWidgetPreferences } from '@/stores/portal/layout.store'
+
+const WIDGETS: WidgetConfig[] = [
+    { id: 'tasks', label: 'Active Tasks', description: 'Pending tasks requiring attention' },
+    { id: 'bookings', label: 'Upcoming Bookings', description: 'Scheduled appointments this week' },
+    { id: 'invoices', label: 'Outstanding Invoices', description: 'Unpaid and overdue invoices' },
+    { id: 'compliance', label: 'Compliance Items', description: 'Upcoming filing deadlines' },
+]
 
 interface DashboardStats {
     tasks: { total: number; pending: number; trend: number }
@@ -38,6 +47,7 @@ interface DashboardStats {
 export default function OverviewTab() {
     // Use React Query hook (stale-while-revalidate, automatic retry)
     const { data, isLoading, error } = usePortalOverview()
+    const preferences = usePortalWidgetPreferences()
 
     // Error state with StatusMessage
     if (error) {
@@ -55,49 +65,63 @@ export default function OverviewTab() {
 
     const stats = (data as any)?.data as DashboardStats | undefined
 
+    const isWidgetVisible = (id: string) => preferences[id]?.visible ?? true
+
     return (
         <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="flex justify-end">
+                <DashboardCustomizer widgets={WIDGETS} />
+            </div>
+
             {/* KPI Metrics with Oracle Fusion KPICard/Grid */}
             <KPIGrid columns={4}>
-                <KPICard
-                    label="Active Tasks"
-                    value={stats?.tasks.total || 0}
-                    trend={stats?.tasks.trend}
-                    comparisonText={`${stats?.tasks.pending || 0} pending`}
-                    icon={CheckSquare}
-                    variant="info"
-                />
+                {isWidgetVisible('tasks') && (
+                    <KPICard
+                        label="Active Tasks"
+                        value={stats?.tasks.total || 0}
+                        trend={stats?.tasks.trend}
+                        comparisonText={`${stats?.tasks.pending || 0} pending`}
+                        icon={CheckSquare}
+                        variant="info"
+                    />
+                )}
 
-                <KPICard
-                    label="Upcoming Bookings"
-                    value={stats?.bookings.upcoming || 0}
-                    trend={stats?.bookings.trend}
-                    comparisonText={`${stats?.bookings.thisWeek || 0} this week`}
-                    icon={Calendar}
-                    variant="success"
-                />
+                {isWidgetVisible('bookings') && (
+                    <KPICard
+                        label="Upcoming Bookings"
+                        value={stats?.bookings.upcoming || 0}
+                        trend={stats?.bookings.trend}
+                        comparisonText={`${stats?.bookings.thisWeek || 0} this week`}
+                        icon={Calendar}
+                        variant="success"
+                    />
+                )}
 
-                <KPICard
-                    label="Outstanding Invoices"
-                    value={stats?.invoices.outstanding || 0}
-                    trend={
-                        stats?.invoices.total
-                            ? ((stats.invoices.outstanding / stats.invoices.total) * 100 - 100)
-                            : 0
-                    }
-                    comparisonText={`${stats?.invoices.overdue || 0} overdue`}
-                    icon={DollarSign}
-                    variant="warning"
-                />
+                {isWidgetVisible('invoices') && (
+                    <KPICard
+                        label="Outstanding Invoices"
+                        value={stats?.invoices.outstanding || 0}
+                        trend={
+                            stats?.invoices.total
+                                ? ((stats.invoices.outstanding / stats.invoices.total) * 100 - 100)
+                                : 0
+                        }
+                        comparisonText={`${stats?.invoices.overdue || 0} overdue`}
+                        icon={DollarSign}
+                        variant="warning"
+                    />
+                )}
 
-                <KPICard
-                    label="Compliance Items"
-                    value={stats?.compliance.pending || 0}
-                    trend={stats?.compliance.trend}
-                    comparisonText={`${stats?.compliance.due || 0} due soon`}
-                    icon={AlertCircle}
-                    variant={stats?.compliance.due && stats.compliance.due > 0 ? 'danger' : 'default'}
-                />
+                {isWidgetVisible('compliance') && (
+                    <KPICard
+                        label="Compliance Items"
+                        value={stats?.compliance.pending || 0}
+                        trend={stats?.compliance.trend}
+                        comparisonText={`${stats?.compliance.due || 0} due soon`}
+                        icon={AlertCircle}
+                        variant={stats?.compliance.due && stats.compliance.due > 0 ? 'danger' : 'default'}
+                    />
+                )}
             </KPIGrid>
 
             {/* Welcome Section with ContentSection */}

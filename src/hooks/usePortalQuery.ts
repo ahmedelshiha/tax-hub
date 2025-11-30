@@ -8,7 +8,7 @@
  * - Cache management
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query'
 import { apiClient, APIClientError } from '@/lib/api-client'
 import { toast } from 'sonner'
 
@@ -66,10 +66,15 @@ export function usePortalActivity() {
 /**
  * Generic portal query hook
  */
-export function usePortalQuery<T>(endpoint: string, key: string[]) {
+export function usePortalQuery<T>(
+  endpoint: string,
+  key: string[],
+  options?: Omit<UseQueryOptions<T, APIClientError>, 'queryKey' | 'queryFn'>
+) {
   return useQuery<T, APIClientError>({
     queryKey: ['portal', ...key],
     queryFn: () => apiClient.get<T>(endpoint),
+    ...options,
   })
 }
 

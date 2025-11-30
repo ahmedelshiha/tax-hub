@@ -13,8 +13,9 @@ interface PortalLayoutState {
     sidebarWidth: number
     expandedGroups: string[]
 
-    //Dashboard state
+    // Dashboard state
     activeTab: string
+    widgetPreferences: Record<string, { visible: boolean; order: number }>
 
     // Entity selection
     selectedEntityId: string | null
@@ -26,6 +27,8 @@ interface PortalLayoutState {
         toggleGroup: (groupName: string) => void
         setActiveTab: (tab: string) => void
         setSelectedEntity: (entityId: string | null) => void
+        updateWidgetPreference: (widgetId: string, preference: { visible?: boolean; order?: number }) => void
+        resetWidgetPreferences: () => void
     }
 }
 
@@ -37,6 +40,7 @@ export const usePortalLayoutStore = create<PortalLayoutState>()(
             sidebarWidth: 256,
             expandedGroups: [],
             activeTab: 'overview',
+            widgetPreferences: {},
             selectedEntityId: null,
 
             // Actions
@@ -59,6 +63,20 @@ export const usePortalLayoutStore = create<PortalLayoutState>()(
 
                 setSelectedEntity: (entityId) =>
                     set({ selectedEntityId: entityId }),
+
+                updateWidgetPreference: (widgetId, preference) =>
+                    set((state) => ({
+                        widgetPreferences: {
+                            ...state.widgetPreferences,
+                            [widgetId]: {
+                                ...(state.widgetPreferences[widgetId] || { visible: true, order: 0 }),
+                                ...preference,
+                            },
+                        },
+                    })),
+
+                resetWidgetPreferences: () =>
+                    set({ widgetPreferences: {} }),
             },
         }),
         {
@@ -68,6 +86,7 @@ export const usePortalLayoutStore = create<PortalLayoutState>()(
                 sidebarWidth: state.sidebarWidth,
                 expandedGroups: state.expandedGroups,
                 activeTab: state.activeTab,
+                widgetPreferences: state.widgetPreferences,
                 // Don't persist selectedEntityId - should be session-specific
             }),
         }
@@ -90,6 +109,9 @@ export const usePortalActiveTab = () =>
 
 export const usePortalSelectedEntity = () =>
     usePortalLayoutStore((state) => state.selectedEntityId)
+
+export const usePortalWidgetPreferences = () =>
+    usePortalLayoutStore((state) => state.widgetPreferences)
 
 // Actions selector
 export const usePortalLayoutActions = () =>
