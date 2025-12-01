@@ -21,30 +21,39 @@ export function BreadcrumbProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<BreadcrumbItem[] | null>(null)
     const [dynamicLabels, setDynamicLabels] = useState<Record<string, string>>({})
 
-    const setBreadcrumbs = (newItems: BreadcrumbItem[]) => {
-        setItems(newItems)
-    }
+    const setBreadcrumbs = React.useCallback((newItems: BreadcrumbItem[]) => {
+        setItems(prev => {
+            // Simple equality check to prevent unnecessary updates
+            if (JSON.stringify(prev) === JSON.stringify(newItems)) return prev
+            return newItems
+        })
+    }, [])
 
-    const resetBreadcrumbs = () => {
+    const resetBreadcrumbs = React.useCallback(() => {
         setItems(null)
         setDynamicLabels({})
-    }
+    }, [])
 
-    const setDynamicLabel = (segment: string, label: string) => {
-        setDynamicLabels(prev => ({
-            ...prev,
-            [segment]: label
-        }))
-    }
+    const setDynamicLabel = React.useCallback((segment: string, label: string) => {
+        setDynamicLabels(prev => {
+            if (prev[segment] === label) return prev
+            return {
+                ...prev,
+                [segment]: label
+            }
+        })
+    }, [])
+
+    const contextValue = React.useMemo(() => ({
+        items,
+        setBreadcrumbs,
+        resetBreadcrumbs,
+        setDynamicLabel,
+        dynamicLabels
+    }), [items, setBreadcrumbs, resetBreadcrumbs, setDynamicLabel, dynamicLabels])
 
     return (
-        <BreadcrumbContext.Provider value={{
-            items,
-            setBreadcrumbs,
-            resetBreadcrumbs,
-            setDynamicLabel,
-            dynamicLabels
-        }}>
+        <BreadcrumbContext.Provider value={contextValue}>
             {children}
         </BreadcrumbContext.Provider>
     )
