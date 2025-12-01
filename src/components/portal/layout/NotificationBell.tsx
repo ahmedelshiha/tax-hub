@@ -77,8 +77,10 @@ export default function NotificationBell({
                 }),
             })
 
-            // Refresh notifications
-            mutate()
+            // Invalidate and refetch notifications
+            queryClient.invalidateQueries({
+                queryKey: ['/api/notifications']
+            })
 
             // Navigate to link if provided
             if (link) {
