@@ -1289,64 +1289,88 @@ Effective cash flow management requires ongoing attention and planning. Regular 
 
   // Documents & Approvals (optional - may not be present in all schemas)
   try {
-    const documentVersions = [
-    {
-      id: 'doc_v_1',
-      tenantId: defaultTenant.id,
-      uploaderId: admin.id,
-      fileName: 'Client_Onboarding_Agreement.pdf',
-      fileType: 'application/pdf',
-      fileSize: 245680,
-      uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
-      version: 1,
-      documentType: 'AGREEMENT' as const,
-      status: 'PUBLISHED' as const,
-    },
-    {
-      id: 'doc_v_2',
-      tenantId: defaultTenant.id,
-      uploaderId: staff.id,
-      fileName: 'Tax_Return_2024.pdf',
-      fileType: 'application/pdf',
-      fileSize: 892310,
-      uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
-      version: 1,
-      documentType: 'TAX_RETURN' as const,
-      status: 'DRAFT' as const,
-    },
-    {
-      id: 'doc_v_3',
-      tenantId: defaultTenant.id,
-      uploaderId: admin.id,
-      fileName: 'Tax_Return_2024.pdf',
-      fileType: 'application/pdf',
-      fileSize: 892310,
-      uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 1),
-      version: 2,
-      documentType: 'TAX_RETURN' as const,
-      status: 'PUBLISHED' as const,
-    },
-    {
-      id: 'doc_v_4',
-      tenantId: defaultTenant.id,
-      uploaderId: lead.id,
-      fileName: 'Financial_Statement_Q3_2024.xlsx',
-      fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      fileSize: 567890,
-      uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 5),
-      version: 1,
-      documentType: 'FINANCIAL_STATEMENT' as const,
-      status: 'PUBLISHED' as const,
-    },
-  ]
+    const attachmentData = [
+      {
+        id: 'attach_1',
+        name: 'Client_Onboarding_Agreement.pdf',
+        contentType: 'application/pdf',
+        size: 245680,
+        uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 7),
+        uploaderId: admin.id,
+        tenantId: defaultTenant.id,
+      },
+      {
+        id: 'attach_2',
+        name: 'Tax_Return_2024.pdf',
+        contentType: 'application/pdf',
+        size: 892310,
+        uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
+        uploaderId: staff.id,
+        tenantId: defaultTenant.id,
+      },
+      {
+        id: 'attach_3',
+        name: 'Financial_Statement_Q3_2024.xlsx',
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        size: 567890,
+        uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 5),
+        uploaderId: lead.id,
+        tenantId: defaultTenant.id,
+      },
+    ];
 
-  for (const doc of documentVersions) {
-    await prisma.documentVersion.upsert({
-      where: { id: doc.id },
-      update: { ...doc, id: undefined },
-      create: doc,
-    })
-  }
+    const attachments = await Promise.all(
+      attachmentData.map((attachment) =>
+        prisma.attachment.upsert({
+          where: { id: attachment.id },
+          update: attachment,
+          create: attachment,
+        })
+      )
+    );
+
+    const documentVersions = [
+      {
+        id: 'doc_v_1',
+        attachmentId: attachments[0].id,
+        versionNumber: 1,
+        uploadedAt: attachments[0].uploadedAt,
+        uploaderId: attachments[0].uploaderId,
+        tenantId: defaultTenant.id,
+      },
+      {
+        id: 'doc_v_2',
+        attachmentId: attachments[1].id,
+        versionNumber: 1,
+        uploadedAt: attachments[1].uploadedAt,
+        uploaderId: attachments[1].uploaderId,
+        tenantId: defaultTenant.id,
+      },
+      {
+        id: 'doc_v_3',
+        attachmentId: attachments[1].id,
+        versionNumber: 2,
+        uploadedAt: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 1),
+        uploaderId: admin.id,
+        tenantId: defaultTenant.id,
+      },
+      {
+        id: 'doc_v_4',
+        attachmentId: attachments[2].id,
+        versionNumber: 1,
+        uploadedAt: attachments[2].uploadedAt,
+        uploaderId: attachments[2].uploaderId,
+        tenantId: defaultTenant.id,
+      },
+    ];
+
+    for (const doc of documentVersions) {
+      await prisma.documentVersion.upsert({
+        where: { id: doc.id },
+        update: { attachmentId: doc.attachmentId, versionNumber: doc.versionNumber, uploadedAt: doc.uploadedAt, uploaderId: doc.uploaderId },
+        create: doc,
+      });
+    }
 
   console.log('✅ Document versions created')
 
