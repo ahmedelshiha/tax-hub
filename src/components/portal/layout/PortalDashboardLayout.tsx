@@ -10,9 +10,10 @@ import { useState } from 'react'
 import PortalSidebar from './PortalSidebar'
 import PortalHeader from './PortalHeader'
 import PortalFooter from './PortalFooter'
-import { Breadcrumbs } from '../Breadcrumbs'
+// TEMPORARILY DISABLED - Debugging infinite loop
+// import { Breadcrumbs } from '../Breadcrumbs'
 import { cn } from '@/lib/utils'
-import { OfflineIndicator } from '../OfflineIndicator'
+// import { OfflineIndicator } from '../OfflineIndicator'
 
 interface PortalDashboardLayoutProps {
     children: React.ReactNode
@@ -51,12 +52,13 @@ export default function PortalDashboardLayout({
                 {/* Header */}
                 <PortalHeader onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
-                {/* Breadcrumbs */}
+                {/* Breadcrumbs - TEMPORARILY DISABLED
                 <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                         <Breadcrumbs />
                     </div>
                 </div>
+                */}
 
                 {/* Scrollable content */}
                 <main
@@ -73,7 +75,9 @@ export default function PortalDashboardLayout({
                 <PortalFooter />
             </div>
 
+            {/* TEMPORARILY DISABLED - Debugging
             <OfflineIndicator />
+            */}
         </div>
     )
 }

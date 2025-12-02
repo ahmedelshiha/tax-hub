@@ -22,15 +22,22 @@ export function PortalAuthGuard({ children }: PortalAuthGuardProps) {
         setIsClient(true)
     }, [])
 
+    // CRITICAL FIX: Move router.push to useEffect to prevent infinite loop
+    // Calling router.push() during render is a state mutation that causes re-renders
+    useEffect(() => {
+        if (isClient && status === 'unauthenticated') {
+            router.push('/api/auth/signin?callbackUrl=/portal')
+        }
+    }, [isClient, status, router])
+
     // While session is loading, show skeleton to avoid hydration mismatch
     if (!isClient || status === 'loading') {
         return <PortalLayoutSkeleton />
     }
 
-    // If not authenticated, redirect to login
+    // If not authenticated, show skeleton while redirecting
     if (status === 'unauthenticated') {
-        router.push('/api/auth/signin?callbackUrl=/portal')
-        return null
+        return <PortalLayoutSkeleton />
     }
 
     // If authenticated, render children
