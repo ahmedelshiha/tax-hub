@@ -28,7 +28,8 @@ import {
     AlertCircle,
 } from 'lucide-react'
 import { DashboardCustomizer, WidgetConfig } from '../DashboardCustomizer'
-import { usePortalWidgetPreferences } from '@/stores/portal/layout.store'
+// CRITICAL FIX: Removed Zustand subscription causing infinite loop
+// import { usePortalWidgetPreferences } from '@/stores/portal/layout.store'
 
 const WIDGETS: WidgetConfig[] = [
     { id: 'tasks', label: 'Active Tasks', description: 'Pending tasks requiring attention' },
@@ -47,7 +48,8 @@ interface DashboardStats {
 export default function OverviewTab() {
     // Use React Query hook (stale-while-revalidate, automatic retry)
     const { data, isLoading, error } = usePortalOverview()
-    const preferences = usePortalWidgetPreferences()
+    // CRITICAL FIX: Removed this Zustand subscription - it was causing infinite loop
+    // const preferences = usePortalWidgetPreferences()
 
     // Error state with StatusMessage
     if (error) {
@@ -65,13 +67,16 @@ export default function OverviewTab() {
 
     const stats = (data as any)?.data as DashboardStats | undefined
 
-    const isWidgetVisible = (id: string) => preferences[id]?.visible ?? true
+    // TEMPORARY: Show all widgets (customization disabled to fix infinite loop)
+    const isWidgetVisible = (id: string) => true // preferences[id]?.visible ?? true
 
     return (
         <div className="space-y-6 animate-in fade-in duration-300">
+            {/* DashboardCustomizer temporarily disabled - uses Zustand
             <div className="flex justify-end">
                 <DashboardCustomizer widgets={WIDGETS} />
             </div>
+            */}
 
             {/* KPI Metrics with Oracle Fusion KPICard/Grid */}
             <KPIGrid columns={4}>
