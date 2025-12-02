@@ -85,7 +85,7 @@ export const POST = withAdminAuth(
         action: 'USER_CREATED',
         entity: 'User',
         entityId: newUser.id,
-        changes: input,
+        changes: input as unknown as Record<string, unknown>,
       })
 
       return respond.created({ data: newUser })
