@@ -99,28 +99,34 @@ function AdminSidebar(props: AdminSidebarProps) {
     {
       section: 'business',
       items: [
-        { name: 'Bookings', href: '/admin/bookings', icon: Calendar, badge: counts?.pendingBookings, children: [
-          { name: 'All Bookings', href: '/admin/bookings', icon: Calendar },
-          { name: 'Calendar View', href: '/admin/calendar', icon: Calendar },
-          { name: 'Availability', href: '/admin/availability', icon: Clock },
-          { name: 'New Booking', href: '/admin/bookings/new', icon: Calendar },
-        ] },
-        { name: 'Services', href: '/admin/services', icon: Briefcase, permission: PERMISSIONS.SERVICES_VIEW, children: [
-          { name: 'All Services', href: '/admin/services', icon: Briefcase },
-          { name: 'Categories', href: '/admin/services/categories', icon: Target },
-          { name: 'Analytics', href: '/admin/services/analytics', icon: BarChart3 },
-        ] },
+        {
+          name: 'Bookings', href: '/admin/bookings', icon: Calendar, badge: counts?.pendingBookings, children: [
+            { name: 'All Bookings', href: '/admin/bookings', icon: Calendar },
+            { name: 'Calendar View', href: '/admin/calendar', icon: Calendar },
+            { name: 'Availability', href: '/admin/availability', icon: Clock },
+            { name: 'New Booking', href: '/admin/bookings/new', icon: Calendar },
+          ]
+        },
+        {
+          name: 'Services', href: '/admin/services', icon: Briefcase, permission: PERMISSIONS.SERVICES_VIEW, children: [
+            { name: 'All Services', href: '/admin/services', icon: Briefcase },
+            { name: 'Categories', href: '/admin/services/categories', icon: Target },
+            { name: 'Analytics', href: '/admin/services/analytics', icon: BarChart3 },
+          ]
+        },
         { name: 'Service Requests', href: '/admin/service-requests', icon: FileText, badge: counts?.pendingServiceRequests, permission: PERMISSIONS.SERVICE_REQUESTS_READ_ALL },
       ]
     },
     {
       section: 'financial',
       items: [
-        { name: 'Invoices', href: '/admin/invoices', icon: FileText, children: [
-          { name: 'All Invoices', href: '/admin/invoices', icon: FileText },
-          { name: 'Sequences', href: '/admin/invoices/sequences', icon: FileText },
-          { name: 'Templates', href: '/admin/invoices/templates', icon: FileText },
-        ] },
+        {
+          name: 'Invoices', href: '/admin/invoices', icon: FileText, children: [
+            { name: 'All Invoices', href: '/admin/invoices', icon: FileText },
+            { name: 'Sequences', href: '/admin/invoices/sequences', icon: FileText },
+            { name: 'Templates', href: '/admin/invoices/templates', icon: FileText },
+          ]
+        },
         { name: 'Payments', href: '/admin/payments', icon: CreditCard },
         { name: 'Expenses', href: '/admin/expenses', icon: Receipt },
         { name: 'Taxes', href: '/admin/taxes', icon: DollarSign },
@@ -137,6 +143,7 @@ function AdminSidebar(props: AdminSidebarProps) {
     {
       section: 'system',
       items: [
+        { name: 'Business Approvals', href: '/admin/approvals/businesses', icon: Building, permission: PERMISSIONS.USERS_MANAGE },
         { name: 'User Management', href: '/admin/users', icon: Users, permission: PERMISSIONS.USERS_MANAGE },
         { name: 'Audits', href: '/admin/audits', icon: FileText, permission: PERMISSIONS.ANALYTICS_VIEW },
         { name: 'Compliance', href: '/admin/compliance', icon: CheckSquare, permission: PERMISSIONS.SECURITY_COMPLIANCE_SETTINGS_VIEW },
@@ -297,7 +304,7 @@ function AdminSidebar(props: AdminSidebarProps) {
                   {!storeCollapsed && (
                     <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{section.section}</h3>
                   )}
-                  <ul className={`${storeCollapsed ? 'space-y-1' : 'space-y-1'}`} ref={(el) => { try { if (el) (roving.setContainer as any)(el as any); } catch{} }} onKeyDown={(e:any) => { try { (roving.handleKeyDown as any)(e.nativeEvent || e); } catch{} }}>
+                  <ul className={`${storeCollapsed ? 'space-y-1' : 'space-y-1'}`} ref={(el) => { try { if (el) (roving.setContainer as any)(el as any); } catch { } }} onKeyDown={(e: any) => { try { (roving.handleKeyDown as any)(e.nativeEvent || e); } catch { } }}>
                     {sectionItems.map(item => renderNavigationItem(item))}
                   </ul>
                 </div>
