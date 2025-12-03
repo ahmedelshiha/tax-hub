@@ -21,6 +21,13 @@ export default function EntitySetupStatusPage() {
   useEffect(() => {
     // Fetch entity name to display in verification screen
     const fetchEntity = async () => {
+      // Handle mock entities
+      if (entityId.startsWith('ent_')) {
+        setEntityName("Test Business");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`/api/entities/${entityId}`);
 
