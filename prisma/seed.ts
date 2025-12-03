@@ -2688,6 +2688,78 @@ Effective cash flow management requires ongoing attention and planning. Regular 
   console.log(`Client 1: client1@example.com / ${clientPlain}`)
   console.log(`Client 2: client2@example.com / ${clientPlain}`)
   console.log(`Lead: lead@accountingfirm.com / ${leadPlain}`)
+
+  // Seed Entities and Approvals (Phase 1 & 2)
+  const entities = [
+    {
+      name: 'Tech Startup Inc',
+      country: 'US',
+      status: 'ACTIVE',
+      legalForm: 'LLC',
+      registrationCertUrl: 'https://example.com/cert.pdf',
+      userId: client1.id,
+      approvalStatus: 'APPROVED',
+    },
+    {
+      name: 'Wilson Consulting',
+      country: 'AE',
+      status: 'PENDING_APPROVAL',
+      legalForm: 'FZE',
+      userId: client2.id,
+      approvalStatus: 'PENDING',
+    },
+    {
+      name: 'Global Trading Co',
+      country: 'SA',
+      status: 'PENDING_APPROVAL',
+      legalForm: 'LLC',
+      userId: client1.id,
+      approvalStatus: 'PENDING',
+    }
+  ]
+
+  for (const ent of entities) {
+    const entity = await prisma.entity.upsert({
+      where: {
+        tenantId_name: {
+          tenantId: defaultTenant.id,
+          name: ent.name
+        }
+      },
+      update: {},
+      create: {
+        tenantId: defaultTenant.id,
+        name: ent.name,
+        country: ent.country,
+        status: ent.status,
+        legalForm: ent.legalForm,
+        registrationCertUrl: ent.registrationCertUrl,
+        createdBy: ent.userId,
+        updatedBy: ent.userId,
+        // Create UserOnEntity relation
+        userOnEntities: {
+          create: {
+            userId: ent.userId,
+            role: 'OWNER'
+          }
+        },
+        // Create EntityApproval relation
+        approval: {
+          create: {
+            requestedBy: ent.userId,
+            status: ent.approvalStatus as any,
+            submittedAt: new Date(),
+            metadata: {
+              source: 'seed',
+              legalForm: ent.legalForm
+            }
+          }
+        }
+      }
+    })
+  }
+
+  console.log('✅ Entities and Approvals created')
 }
 
 export async function runSeed() {

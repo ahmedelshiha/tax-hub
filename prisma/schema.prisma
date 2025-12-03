@@ -120,6 +120,8 @@ model User {
   knowledgeBaseArticles     KnowledgeBaseArticle[]  @relation("UserToKnowledgeBaseArticle")
   paymentMethods            UserPaymentMethod[]     @relation("UserToUserPaymentMethod")
   userOnEntities            UserOnEntity[]
+  entityApprovalsRequested  EntityApproval[]        @relation("ApprovalRequester")
+  entityApprovalsReviewed   EntityApproval[]        @relation("ApprovalReviewer")
   approvalsRequested        Approval[]              @relation("ApprovalRequester")
   approvalsToApprove        Approval[]              @relation("ApprovalApprover")
   approvalsDecided          Approval[]              @relation("ApprovalDecider")
@@ -2359,6 +2361,7 @@ model Entity {
   consents              Consent[]
   taxFilings            TaxFiling[]
   userOnEntities        UserOnEntity[]
+  approval              EntityApproval?     // One-to-one relation
   attachments           Attachment[]
   bills                 Bill[]
 
@@ -2387,6 +2390,31 @@ model UserOnEntity {
   @@index([entityId])
   @@map("user_on_entities")
 }
+
+// Entity Approval Model - Phase 2: Admin Approval Workflow
+model EntityApproval {
+  id              String   @id @default(cuid())
+  entityId        String   @unique
+  requestedBy     String
+  reviewedBy      String?
+  status          EntityApprovalStatus @default(PENDING)
+  submittedAt     DateTime @default(now())
+  reviewedAt      DateTime?
+  rejectionReason String?
+  metadata        Json?
+  
+  // Relations
+  entity    Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  requester User   @relation("ApprovalRequester", fields: [requestedBy], references: [id])
+  reviewer  User?  @relation("ApprovalReviewer", fields: [reviewedBy], references: [id])
+  
+  // Indexes for common queries
+  @@index([status, submittedAt])  // List pending approvals sorted by submission
+  @@index([reviewedBy])            // Track approvals by reviewer
+  @@index([requestedBy])           // Track approvals by requester
+  @@map("entity_approvals")
+}
+
 
 model EntityLicense {
   id                    String                @id @default(cuid())
@@ -3445,4 +3473,12 @@ enum ApprovalPriority {
   NORMAL
   HIGH
   URGENT
+}
+
+// Entity Approval Status - Phase 2
+enum EntityApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REQUIRES_CHANGES
 }

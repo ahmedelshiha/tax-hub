@@ -227,16 +227,91 @@ export async function notifyApprovalProcessed(params: {
     const isApproved = params.action === 'approved'
 
     return createNotification({
-        tenantId: params.tenantId,
-        userId: params.requesterId,
-        type: 'approval',
-        title: `Approval ${isApproved ? 'Approved' : 'Rejected'}`,
-        message: `Your ${params.approvalType} request was ${params.action} by ${params.approverName}`,
-        description: params.comment,
-        link: `/portal/approvals/${params.approvalId}`,
-        entityType: 'approval',
-        entityId: params.approvalId,
-        relatedUserId: params.approverId,
-        priority: isApproved ? 'normal' : 'high',
     })
+}
+
+/**
+ * Notify admins when entity is submitted for approval
+ */
+export async function notifyAdminsOfEntitySubmission(params: {
+    tenantId: string
+    entityId: string
+    businessName: string
+    userName: string
+}) {
+    const admins = await prisma.user.findMany({
+        where: {
+            tenantId: params.tenantId,
+            role: { in: ['ADMIN', 'SUPER_ADMIN'] },
+        },
+    })
+
+    for (const admin of admins) {
+        await createNotification({
+            tenantId: params.tenantId,
+            userId: admin.id,
+            type: 'entity',
+            title: 'New Business Submission',
+            message: `${params.userName} submitted ${params.businessName} for approval`,
+            link: `/admin/approvals/businesses`,
+            entityType: 'entity',
+            entityId: params.entityId,
+            priority: 'high',
+        })
+    }
+}
+
+/**
+ * Notify client when entity is approved
+ */
+export async function notifyEntityApproved(params: {
+    tenantId: string
+    entityId: string
+    clientId: string
+    businessName: string
+}) {
+    return createNotification({
+        tenantId: params.tenantId,
+        userId: params.clientId,
+        type: 'entity',
+        title: 'Business Approved',
+        message: `Your business ${params.businessName} has been approved and is now active`,
+        link: `/portal/businesses`,
+        entityType: 'entity',
+        entityId: params.entityId,
+        priority: 'high',
+    })
+}
+
+/**
+ * Notify client when entity is rejected or needs changes
+ */
+export async function notifyEntityRejected(params: {
+    tenantId: string
+    entityId: string
+    clientId: string
+    businessName: string
+    reason: string
+}) {
+    return createNotification({
+        tenantId: params.tenantId,
+        userId: params.clientId,
+        type: 'entity',
+        title: 'Business Update Required',
+        message: `${params.businessName}: ${params.reason}`,
+        link: `/portal/businesses`,
+        entityType: 'entity',
+        entityId: params.entityId,
+        priority: 'urgent',
+        metadata: { reason: params.reason },
+    })
+}
+
+// Export a notification manager object for backward compatibility
+export const notificationManager = {
+    notifyAdminsOfEntitySubmission,
+    notifyEntityApproved,
+    notifyEntityRejected,
+    notifyClientOfApproval: notifyEntityApproved,
+    notifyClientOfRejection: notifyEntityRejected,
 }
