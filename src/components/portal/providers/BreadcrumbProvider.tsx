@@ -44,13 +44,16 @@ export function BreadcrumbProvider({ children }: { children: ReactNode }) {
         })
     }, [])
 
+    // CRITICAL FIX: Only include state values in dependency array
+    // Memoized callbacks (setBreadcrumbs, resetBreadcrumbs, setDynamicLabel) have stable references
+    // and should NOT be included as dependencies to prevent infinite loops
     const contextValue = React.useMemo(() => ({
         items,
         setBreadcrumbs,
         resetBreadcrumbs,
         setDynamicLabel,
         dynamicLabels
-    }), [items, setBreadcrumbs, resetBreadcrumbs, setDynamicLabel, dynamicLabels])
+    }), [items, dynamicLabels])
 
     return (
         <BreadcrumbContext.Provider value={contextValue}>

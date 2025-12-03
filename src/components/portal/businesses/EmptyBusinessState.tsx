@@ -4,11 +4,14 @@ import { Building2, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { useRouter } from "next/navigation";
+
 interface EmptyBusinessStateProps {
   hasFilters: boolean;
 }
 
 export function EmptyBusinessState({ hasFilters }: EmptyBusinessStateProps) {
+  const router = useRouter();
   if (hasFilters) {
     return (
       <Card className="border-dashed">
@@ -37,7 +40,7 @@ export function EmptyBusinessState({ hasFilters }: EmptyBusinessStateProps) {
         <Button
           size="lg"
           className="gap-2"
-          onClick={() => (window.location.href = "/portal/setup")}
+          onClick={() => router.push("/portal/business-setup")}
         >
           <Plus className="h-4 w-4" />
           Add Your First Business

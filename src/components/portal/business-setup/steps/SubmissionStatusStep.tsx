@@ -66,7 +66,7 @@ export default function SubmissionStatusStep() {
             <Button
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => router.push(`/portal/setup/status/${entityId}`)}
+                onClick={() => router.push(`/portal/business-setup/status/${entityId}`)}
             >
                 Go to Dashboard
                 <ArrowRight className="w-4 h-4 ml-2" />

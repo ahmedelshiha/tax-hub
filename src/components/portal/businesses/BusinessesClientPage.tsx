@@ -13,7 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type BusinessStatus = "all" | "ACTIVE" | "PENDING_APPROVAL" | "REJECTED" | "REQUIRES_CHANGES";
 
+import { useRouter } from "next/navigation";
+
 export default function BusinessesClientPage() {
+    const router = useRouter();
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<BusinessStatus>("all");
 
@@ -44,7 +47,7 @@ export default function BusinessesClientPage() {
                 <Button
                     size="lg"
                     className="gap-2"
-                    onClick={() => (window.location.href = "/portal/setup")}
+                    onClick={() => router.push("/portal/business-setup")}
                 >
                     <Plus className="h-4 w-4" />
                     Add Business

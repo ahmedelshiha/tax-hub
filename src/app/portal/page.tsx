@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Search } from "lucide-react";
 import { usePortalActiveTab, usePortalLayoutActions } from "@/stores/portal/layout.store";
-import SetupWizard from "@/components/portal/business-setup/core/SetupOrchestrator";
+
 // EntitySwitcher is in Header now
 // import EntitySwitcher from "@/components/portal/layout/EntitySwitcher";
 import { useModal } from "@/components/providers/ModalProvider";
@@ -50,11 +50,6 @@ export default function PortalDashboardPage() {
 
   // Tab state - LOCAL STATE for debugging
   const [activeTab, setActiveTab] = useState("overview");
-  // const activeTab = usePortalActiveTab();
-  // const { setActiveTab } = usePortalLayoutActions();
-
-  // Modal states
-  const [setupWizardOpen, setSetupWizardOpen] = useState(false);
 
   // Global search keyboard shortcut (Cmd+K / Ctrl+K)
   useKeyboardShortcut({
@@ -63,13 +58,6 @@ export default function PortalDashboardPage() {
     description: 'Open global search',
     action: () => openModal('global-search')
   })
-
-  // Handle business setup wizard completion
-  const handleSetupComplete = (entityId: string) => {
-    setSetupWizardOpen(false);
-    toast.success("Business setup completed successfully!");
-    router.refresh();
-  };
 
   // Helper function for time-based greeting
   function getGreeting(): string {
@@ -81,13 +69,6 @@ export default function PortalDashboardPage() {
 
   return (
     <>
-      {/* Modals */}
-      <SetupWizard
-        open={setupWizardOpen}
-        onOpenChange={setSetupWizardOpen}
-        onComplete={handleSetupComplete}
-      />
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
         {/* Header */}
@@ -122,7 +103,7 @@ export default function PortalDashboardPage() {
               </Button>
               <Button
                 size="sm"
-                onClick={() => setSetupWizardOpen(true)}
+                onClick={() => router.push("/portal/business-setup")}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Business

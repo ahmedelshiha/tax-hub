@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  Building2, 
-  ChevronDown, 
-  Check, 
+import {
+  Building2,
+  ChevronDown,
+  Check,
   PlusCircle,
   Loader2
 } from "lucide-react";
@@ -28,12 +28,12 @@ import { fetcher } from "@/lib/api-client";
 
 export function BusinessSwitcher() {
   const router = useRouter();
-  const { 
-    activeBusiness, 
-    activeBusinessId, 
-    businesses, 
-    setBusinesses, 
-    setActiveBusiness 
+  const {
+    activeBusiness,
+    activeBusinessId,
+    businesses,
+    setBusinesses,
+    setActiveBusiness
   } = useBusinessContext();
 
   // Fetch businesses
@@ -111,7 +111,7 @@ export function BusinessSwitcher() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/portal/setup" className="cursor-pointer">
+          <Link href="/portal/business-setup" className="cursor-pointer">
             <PlusCircle className="mr-2 h-5 w-5" />
             Add Business
           </Link>
