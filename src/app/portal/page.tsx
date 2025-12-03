@@ -48,9 +48,10 @@ export default function PortalDashboardPage() {
   const { data: session } = useSession();
   const { openModal } = useModal();
 
-  // Tab state - Persisted via Zustand
-  const activeTab = usePortalActiveTab();
-  const { setActiveTab } = usePortalLayoutActions();
+  // Tab state - LOCAL STATE for debugging
+  const [activeTab, setActiveTab] = useState("overview");
+  // const activeTab = usePortalActiveTab();
+  // const { setActiveTab } = usePortalLayoutActions();
 
   // Modal states
   const [setupWizardOpen, setSetupWizardOpen] = useState(false);
