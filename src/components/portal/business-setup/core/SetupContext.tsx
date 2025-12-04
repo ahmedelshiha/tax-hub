@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { SetupFormData, SetupContextType, ValidationResult } from '../types/setup'
 import { draftService, entitySetupService } from '../services'
@@ -101,7 +101,7 @@ export function SetupProvider({ children, onComplete }: { children: ReactNode; o
         }
     }, [formData])
 
-    const value = {
+    const value = useMemo(() => ({
         currentStep,
         completedSteps,
         formData,
@@ -123,7 +123,24 @@ export function SetupProvider({ children, onComplete }: { children: ReactNode; o
             setShowHelpPanel,
             onComplete
         }
-    }
+    }), [
+        currentStep,
+        completedSteps,
+        formData,
+        isLoading,
+        isSavingDraft,
+        lastSavedAt,
+        validationErrors,
+        showHelpPanel,
+        updateFormData,
+        goToStep,
+        nextStep,
+        prevStep,
+        saveDraft,
+        submitSetup,
+        markStepComplete,
+        onComplete
+    ])
 
     return (
         <SetupContext.Provider value={value}>

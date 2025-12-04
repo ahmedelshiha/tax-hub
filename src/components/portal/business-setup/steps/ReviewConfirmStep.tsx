@@ -104,7 +104,17 @@ export default function ReviewConfirmStep() {
                 <Button
                     size="lg"
                     className="w-full md:w-1/2 bg-green-600 hover:bg-green-700"
-                    onClick={() => actions.submitSetup()}
+                    onClick={async () => {
+                        try {
+                            const result = await actions.submitSetup()
+                            if (result.success) {
+                                actions.nextStep()
+                            }
+                        } catch (error) {
+                            // Error is handled by context/service and shown in UI
+                            console.error("Submission failed:", error)
+                        }
+                    }}
                     disabled={!formData.termsAccepted}
                 >
                     &quot;Submit Application&quot;

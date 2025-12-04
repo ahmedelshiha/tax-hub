@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 import { toast } from 'sonner'
 import SetupOrchestrator from '@/components/portal/business-setup/core/SetupOrchestrator'
 
@@ -12,11 +13,11 @@ import SetupOrchestrator from '@/components/portal/business-setup/core/SetupOrch
 export default function BusinessSetupPage() {
     const router = useRouter()
 
-    const handleComplete = (entityId: string) => {
+    const handleComplete = useCallback((entityId: string) => {
         toast.success('Business setup completed successfully!')
         // Redirect to the new business entity page
         router.push(`/portal/businesses/${entityId}`)
-    }
+    }, [router])
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
