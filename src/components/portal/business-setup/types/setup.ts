@@ -17,6 +17,7 @@ export interface SetupFormData {
   dateOfBirth?: string
 
   // Step 4: Details
+  economicDepartment?: string  // NEW: Economic department/free zone selection
   economicZone?: string
   legalForm?: string
   taxId?: string
