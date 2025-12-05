@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, Search, CheckCircle2 } from 'lucide-react'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
-import { UAE_DEPARTMENTS, searchDepartments, type EconomicDepartment } from '../constants/departments'
+import { UAE_DEPARTMENTS, type EconomicDepartment } from '../constants/departments'
 import type { SetupFormData } from '../types/setup'
 import type { Country } from '../fields/CountryFlagSelector'
 import { validationService } from '../services/validationService'
+import { businessSetupApi, APIError } from '../services/businessSetupApi'
 
 export interface ExistingEntityTabProps {
     country: Country['code']
@@ -41,20 +42,31 @@ export function ExistingEntityTab({
         setErrors({})
 
         try {
-            // TODO: Implement actual API call
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            // Call real API
+            const result = await businessSetupApi.lookupLicense(
+                formData.licenseNumber,
+                country as 'AE' | 'SA' | 'EG'
+            )
 
-            // Mock successful lookup
-            onFormDataChange({
-                ...formData,
-                businessName: 'Example Trading LLC',
-                economicDepartment: 'dmcc',
-                activities: ['General Trading', 'Import/Export']
-            })
-
-            setLookupSuccess(true)
+            if (result.found && result.data) {
+                onFormDataChange({
+                    ...formData,
+                    businessName: result.data.businessName,
+                    economicDepartment: result.data.economicDepartment,
+                    activities: result.data.activities,
+                })
+                setLookupSuccess(true)
+            } else {
+                setErrors({
+                    licenseNumber: result.error?.message || 'License not found or invalid'
+                })
+            }
         } catch (error) {
-            setErrors({ licenseNumber: 'License not found or invalid' })
+            if (error instanceof APIError) {
+                setErrors({ licenseNumber: error.message })
+            } else {
+                setErrors({ licenseNumber: 'Failed to lookup license. Please try again.' })
+            }
         } finally {
             setIsLookingUp(false)
         }
@@ -107,7 +119,7 @@ export function ExistingEntityTab({
                             onFormDataChange({ ...formData, licenseNumber: e.target.value })
                             setLookupSuccess(false)
                         }}
-                        placeholder="Enter your license number"
+                        placeholder="Enter your license number (e.g., DMCC-123456)"
                         className={`
               flex-1 px-4 py-2.5
               bg-gray-800 border rounded-lg

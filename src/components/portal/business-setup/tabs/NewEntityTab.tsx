@@ -8,6 +8,7 @@ import { UAE_DEPARTMENTS, type EconomicDepartment } from '../constants/departmen
 import type { SetupFormData } from '../types/setup'
 import type { Country } from '../fields/CountryFlagSelector'
 import { validationService } from '../services/validationService'
+import { businessSetupApi, APIError } from '../services/businessSetupApi'
 
 export interface NewEntityTabProps {
     country: Country['code']
@@ -28,8 +29,11 @@ export function NewEntityTab({
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [termsAccepted, setTermsAccepted] = useState(false)
+    const [submitError, setSubmitError] = useState<string | null>(null)
 
     const handleSubmit = async () => {
+        setSubmitError(null)
+
         const validationErrors = validationService.validateForm({
             ...formData,
             businessType: 'new',
@@ -47,11 +51,31 @@ export function NewEntityTab({
 
         setIsSubmitting(true)
         try {
+            // Call the real API
+            await businessSetupApi.setupEntity({
+                country: country as 'AE' | 'SA' | 'EG',
+                businessType: 'new',
+                businessName: formData.businessName!,
+                economicDepartment: formData.economicDepartment!,
+                termsAccepted: true,
+            })
+
+            // Call the parent onSubmit for any additional handling (e.g., closing modal)
             await onSubmit({
                 ...formData,
                 businessType: 'new',
                 termsAccepted
             } as SetupFormData)
+        } catch (error) {
+            if (error instanceof APIError) {
+                if (error.field) {
+                    setErrors({ [error.field]: error.message })
+                } else {
+                    setSubmitError(error.message)
+                }
+            } else {
+                setSubmitError('Failed to complete setup. Please try again.')
+            }
         } finally {
             setIsSubmitting(false)
         }
@@ -63,6 +87,13 @@ export function NewEntityTab({
 
     return (
         <div className="space-y-6">
+            {/* Submit Error */}
+            {submitError && (
+                <div className="p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                    <p className="text-sm text-red-400">{submitError}</p>
+                </div>
+            )}
+
             {/* Proposed Business Name */}
             <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
