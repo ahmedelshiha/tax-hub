@@ -414,6 +414,7 @@ model Tenant {
   entitySetupAuditLogs      EntitySetupAuditLog[]             @relation("EntitySetupAuditLogs")
   apiKeys                   ApiKey[]
   tenantWebhooks            TenantWebhook[]
+  ssoConnections            SsoConnection[]
 
   @@index([status])
 }
@@ -3606,3 +3607,38 @@ model WebhookDelivery {
   @@map("webhook_deliveries")
 }
 
+// SSO Connection configuration
+model SsoConnection {
+  id              String    @id @default(cuid())
+  tenantId        String
+  name            String    @db.VarChar(100)  // "Okta", "Azure AD", etc.
+  provider        String    @db.VarChar(20)   // "saml", "oidc"
+  enabled         Boolean   @default(false)
+  
+  // SAML Configuration
+  entityId        String?   @db.VarChar(500)  // SP Entity ID
+  ssoUrl          String?   @db.VarChar(500)  // IdP SSO URL
+  certificate     String?   @db.Text          // IdP Certificate (PEM)
+  
+  // OIDC Configuration (future)
+  clientId        String?   @db.VarChar(200)
+  clientSecret    String?   @db.VarChar(500)
+  discoveryUrl    String?   @db.VarChar(500)
+  
+  // Domain mapping for auto-SSO
+  emailDomains    String[]  // ["company.com", "corp.company.com"]
+  
+  // Metadata
+  metadata        Json?
+  lastTestAt      DateTime?
+  lastTestResult  String?   @db.VarChar(50)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([tenantId, provider])
+  @@index([tenantId])
+  @@index([enabled])
+  @@map("sso_connections")
+}
