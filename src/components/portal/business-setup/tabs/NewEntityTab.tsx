@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
-import { UAE_DEPARTMENTS, type EconomicDepartment } from '../constants/departments'
+import { getDepartmentsByCountry, type EconomicDepartment } from '../constants/departments'
 import type { SetupFormData } from '../types/setup'
 import type { Country } from '../fields/CountryFlagSelector'
 import { validationService } from '../services/validationService'
@@ -81,8 +81,11 @@ export function NewEntityTab({
         }
     }
 
+    // Get country-specific departments
+    const departments = getDepartmentsByCountry(country as 'AE' | 'SA' | 'EG')
+
     const selectedDepartment = formData.economicDepartment
-        ? UAE_DEPARTMENTS.find(d => d.id === formData.economicDepartment) ?? null
+        ? departments.find(d => d.id === formData.economicDepartment) ?? null
         : null
 
     return (
@@ -131,7 +134,7 @@ export function NewEntityTab({
                     Economic Department / Free Zone <span className="text-red-400">*</span>
                 </label>
                 <SearchableSelect<EconomicDepartment>
-                    items={UAE_DEPARTMENTS}
+                    items={departments}
                     value={selectedDepartment}
                     onChange={(dept) => {
                         onFormDataChange({ ...formData, economicDepartment: dept?.id })

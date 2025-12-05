@@ -359,10 +359,360 @@ export const searchDepartments = (query: string): EconomicDepartment[] => {
  * Get department by ID
  */
 export const getDepartmentById = (id: string): EconomicDepartment | undefined => {
-    return UAE_DEPARTMENTS.find(dept => dept.id === id)
+    return ALL_DEPARTMENTS.find(dept => dept.id === id)
 }
 
 /**
- * Get department count
+ * Saudi Arabia Departments and Authorities
  */
-export const DEPARTMENT_COUNT = UAE_DEPARTMENTS.length
+export const SA_DEPARTMENTS: EconomicDepartment[] = [
+    {
+        id: 'sa-mci',
+        name: 'Ministry of Commerce',
+        shortName: 'MCI',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['commerce', 'ministry', 'saudi', 'trade', 'cr'],
+        website: 'https://mc.gov.sa',
+        isPopular: true
+    },
+    {
+        id: 'sa-misa',
+        name: 'Ministry of Investment',
+        shortName: 'MISA',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['investment', 'foreign', 'sagia', 'invest saudi'],
+        website: 'https://misa.gov.sa',
+        isPopular: true
+    },
+    {
+        id: 'sa-kaec',
+        name: 'King Abdullah Economic City',
+        shortName: 'KAEC',
+        country: 'SA',
+        category: 'free_zone',
+        keywords: ['economic city', 'jeddah', 'port', 'industrial'],
+        website: 'https://www.kaec.net',
+        isPopular: true
+    },
+    {
+        id: 'sa-neom',
+        name: 'NEOM',
+        shortName: 'NEOM',
+        country: 'SA',
+        category: 'free_zone',
+        keywords: ['neom', 'future', 'tech', 'tabuk', 'mega project'],
+        website: 'https://www.neom.com',
+        isPopular: true
+    },
+    {
+        id: 'sa-modon',
+        name: 'Saudi Industrial Property Authority',
+        shortName: 'MODON',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['industrial', 'manufacturing', 'factory', 'modon'],
+        website: 'https://www.modon.gov.sa'
+    },
+    {
+        id: 'sa-rcrc',
+        name: 'Royal Commission for Riyadh City',
+        shortName: 'RCRC',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['riyadh', 'capital', 'development'],
+        website: 'https://www.rcrc.gov.sa'
+    },
+    {
+        id: 'sa-rcjy',
+        name: 'Royal Commission for Jubail and Yanbu',
+        shortName: 'RCJY',
+        country: 'SA',
+        category: 'free_zone',
+        keywords: ['jubail', 'yanbu', 'industrial', 'petrochemical'],
+        website: 'https://www.rcjy.gov.sa',
+        isPopular: true
+    },
+    {
+        id: 'sa-sez-jazan',
+        name: 'Jazan Economic City',
+        shortName: 'JEC',
+        country: 'SA',
+        category: 'free_zone',
+        keywords: ['jazan', 'economic city', 'industrial', 'port'],
+        website: 'https://jazancity.com.sa'
+    },
+    {
+        id: 'sa-riyadh-chamber',
+        name: 'Riyadh Chamber of Commerce',
+        shortName: 'RCC',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['riyadh', 'chamber', 'commerce', 'business'],
+        website: 'https://www.riyadhchamber.com'
+    },
+    {
+        id: 'sa-jeddah-chamber',
+        name: 'Jeddah Chamber of Commerce',
+        shortName: 'JCC',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['jeddah', 'chamber', 'commerce', 'business'],
+        website: 'https://www.jcci.org.sa'
+    },
+    {
+        id: 'sa-dammam-chamber',
+        name: 'Eastern Province Chamber of Commerce',
+        shortName: 'EPCC',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['dammam', 'eastern', 'chamber', 'commerce', 'oil'],
+        website: 'https://www.chamber.org.sa'
+    },
+    {
+        id: 'sa-zatca',
+        name: 'Zakat, Tax and Customs Authority',
+        shortName: 'ZATCA',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['tax', 'zakat', 'customs', 'vat', 'gazt'],
+        website: 'https://zatca.gov.sa',
+        isPopular: true
+    },
+    {
+        id: 'sa-sagia',
+        name: 'Saudi Arabian General Investment Authority',
+        shortName: 'SAGIA',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['investment', 'foreign', 'license', 'sagia'],
+        website: 'https://investsaudi.sa'
+    },
+    {
+        id: 'sa-sfda',
+        name: 'Saudi Food and Drug Authority',
+        shortName: 'SFDA',
+        country: 'SA',
+        category: 'mainland',
+        keywords: ['food', 'drug', 'pharmaceutical', 'medical', 'cosmetics'],
+        website: 'https://www.sfda.gov.sa'
+    },
+    {
+        id: 'sa-knowledge-city',
+        name: 'King Abdullah University Science and Technology',
+        shortName: 'KAUST',
+        country: 'SA',
+        category: 'free_zone',
+        keywords: ['university', 'research', 'tech', 'science', 'innovation'],
+        website: 'https://www.kaust.edu.sa'
+    }
+]
+
+/**
+ * Egypt Departments and Authorities
+ */
+export const EG_DEPARTMENTS: EconomicDepartment[] = [
+    {
+        id: 'eg-gafi',
+        name: 'General Authority for Investment and Free Zones',
+        shortName: 'GAFI',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['investment', 'gafi', 'foreign', 'one stop shop'],
+        website: 'https://www.gafi.gov.eg',
+        isPopular: true
+    },
+    {
+        id: 'eg-sczone',
+        name: 'Suez Canal Economic Zone',
+        shortName: 'SCZONE',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['suez', 'canal', 'port', 'industrial', 'logistics'],
+        website: 'https://www.sczone.eg',
+        isPopular: true
+    },
+    {
+        id: 'eg-cra',
+        name: 'Commercial Registry Authority',
+        shortName: 'CRA',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['commercial', 'registry', 'company', 'registration'],
+        website: 'https://www.cairo.gov.eg',
+        isPopular: true
+    },
+    {
+        id: 'eg-eta',
+        name: 'Egyptian Tax Authority',
+        shortName: 'ETA',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['tax', 'vat', 'income', 'eta'],
+        website: 'https://www.eta.gov.eg',
+        isPopular: true
+    },
+    {
+        id: 'eg-smart-village',
+        name: 'Smart Village Cairo',
+        shortName: 'Smart Village',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['tech', 'it', 'smart', 'cairo', 'technology park'],
+        website: 'https://www.smart-villages.com',
+        isPopular: true
+    },
+    {
+        id: 'eg-alex-fz',
+        name: 'Alexandria Free Zone',
+        shortName: 'Alex FZ',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['alexandria', 'port', 'free zone', 'trade'],
+        website: 'https://www.gafi.gov.eg'
+    },
+    {
+        id: 'eg-nasr-city-fz',
+        name: 'Nasr City Free Zone',
+        shortName: 'Nasr City FZ',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['nasr city', 'cairo', 'free zone', 'industrial'],
+        website: 'https://www.gafi.gov.eg'
+    },
+    {
+        id: 'eg-port-said-fz',
+        name: 'Port Said Free Zone',
+        shortName: 'Port Said FZ',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['port said', 'suez', 'canal', 'port', 'shipping'],
+        website: 'https://www.gafi.gov.eg'
+    },
+    {
+        id: 'eg-itida',
+        name: 'Information Technology Industry Development Agency',
+        shortName: 'ITIDA',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['it', 'software', 'tech', 'outsourcing', 'digital'],
+        website: 'https://www.itida.gov.eg',
+        isPopular: true
+    },
+    {
+        id: 'eg-fedcoc',
+        name: 'Federation of Egyptian Chambers of Commerce',
+        shortName: 'FEDCOC',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['chamber', 'commerce', 'trade', 'business'],
+        website: 'https://www.fedcoc.org.eg'
+    },
+    {
+        id: 'eg-cairo-chamber',
+        name: 'Cairo Chamber of Commerce',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['cairo', 'chamber', 'commerce', 'business'],
+        website: 'https://www.cairochamber.org.eg'
+    },
+    {
+        id: 'eg-ida',
+        name: 'Industrial Development Authority',
+        shortName: 'IDA',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['industrial', 'manufacturing', 'factory', 'license'],
+        website: 'https://www.ida.gov.eg'
+    },
+    {
+        id: 'eg-new-capital',
+        name: 'New Administrative Capital',
+        shortName: 'NAC',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['new capital', 'cairo', 'government', 'business district'],
+        website: 'https://www.acud.eg'
+    },
+    {
+        id: 'eg-ain-sokhna',
+        name: 'Ain Sokhna Industrial Zone',
+        shortName: 'Ain Sokhna',
+        country: 'EG',
+        category: 'free_zone',
+        keywords: ['ain sokhna', 'red sea', 'industrial', 'port'],
+        website: 'https://www.sczone.eg'
+    },
+    {
+        id: 'eg-10th-ramadan',
+        name: '10th of Ramadan City Industrial Zone',
+        shortName: '10th Ramadan',
+        country: 'EG',
+        category: 'mainland',
+        keywords: ['10th ramadan', 'industrial', 'manufacturing', 'cairo'],
+        website: 'https://www.newcities.gov.eg'
+    }
+]
+
+/**
+ * All departments combined
+ */
+export const ALL_DEPARTMENTS: EconomicDepartment[] = [
+    ...UAE_DEPARTMENTS,
+    ...SA_DEPARTMENTS,
+    ...EG_DEPARTMENTS,
+]
+
+/**
+ * Get departments by country
+ */
+export const getDepartmentsByCountry = (country: 'AE' | 'SA' | 'EG'): EconomicDepartment[] => {
+    switch (country) {
+        case 'AE': return UAE_DEPARTMENTS
+        case 'SA': return SA_DEPARTMENTS
+        case 'EG': return EG_DEPARTMENTS
+        default: return UAE_DEPARTMENTS
+    }
+}
+
+/**
+ * Search all departments
+ */
+export const searchAllDepartments = (query: string, country?: 'AE' | 'SA' | 'EG'): EconomicDepartment[] => {
+    const departments = country ? getDepartmentsByCountry(country) : ALL_DEPARTMENTS
+
+    if (!query || query.trim().length === 0) {
+        return departments
+    }
+
+    const lowerQuery = query.toLowerCase().trim()
+
+    return departments.filter(dept => {
+        const nameMatch = dept.name.toLowerCase().includes(lowerQuery)
+        const shortNameMatch = dept.shortName?.toLowerCase().includes(lowerQuery)
+        const keywordMatch = dept.keywords.some(keyword =>
+            keyword.toLowerCase().includes(lowerQuery)
+        )
+
+        return nameMatch || shortNameMatch || keywordMatch
+    })
+}
+
+/**
+ * Get popular departments by country
+ */
+export const getPopularDepartments = (country: 'AE' | 'SA' | 'EG'): EconomicDepartment[] => {
+    return getDepartmentsByCountry(country).filter(dept => dept.isPopular)
+}
+
+/**
+ * Get department count by country
+ */
+export const DEPARTMENT_COUNTS = {
+    AE: UAE_DEPARTMENTS.length,
+    SA: SA_DEPARTMENTS.length,
+    EG: EG_DEPARTMENTS.length,
+    TOTAL: UAE_DEPARTMENTS.length + SA_DEPARTMENTS.length + EG_DEPARTMENTS.length,
+}
+
