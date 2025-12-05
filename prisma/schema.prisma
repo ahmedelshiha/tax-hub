@@ -135,6 +135,7 @@ model User {
   sentMessages                Message[]                  @relation("SentMessages")
   receivedMessages            Message[]                  @relation("ReceivedMessages")
   entitySetupAuditLogs        EntitySetupAuditLog[]      @relation("EntitySetupAuditLogs")
+  apiKeys                     ApiKey[]
 
   @@unique([tenantId, email])
   @@index([tenantId, role])
@@ -411,6 +412,8 @@ model Tenant {
   analysisJobs              AnalysisJob[]
   messages                  Message[]
   entitySetupAuditLogs      EntitySetupAuditLog[]             @relation("EntitySetupAuditLogs")
+  apiKeys                   ApiKey[]
+  tenantWebhooks            TenantWebhook[]
 
   @@index([status])
 }
@@ -3531,3 +3534,75 @@ enum EntityApprovalStatus {
   REJECTED
   REQUIRES_CHANGES
 }
+
+// ================================
+// Phase 9: Enterprise Features
+// ================================
+
+// API Key for programmatic access
+model ApiKey {
+  id          String    @id @default(cuid())
+  tenantId    String
+  userId      String
+  name        String    @db.VarChar(100)
+  keyHash     String    @unique  // SHA-256 hash of the key
+  keyPrefix   String    @db.VarChar(12)  // First chars for display (e.g., "txhb_live_...")
+  scopes      String[]  // ["entities:read", "entities:write", "*"]
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  lastUsedIp  String?   @db.VarChar(45)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  revokedAt   DateTime?
+  
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([tenantId])
+  @@index([keyHash])
+  @@index([userId])
+  @@map("api_keys")
+}
+
+// Tenant webhook configuration
+model TenantWebhook {
+  id          String    @id @default(cuid())
+  tenantId    String
+  url         String    @db.VarChar(500)
+  secret      String    @db.VarChar(100)  // HMAC secret
+  events      String[]  // ["entity.created", "entity.approved"]
+  isActive    Boolean   @default(true)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries  WebhookDelivery[]
+  
+  @@index([tenantId])
+  @@index([isActive])
+  @@map("tenant_webhooks")
+}
+
+// Webhook delivery log
+model WebhookDelivery {
+  id          String    @id @default(cuid())
+  webhookId   String
+  event       String    @db.VarChar(100)
+  payload     Json
+  status      String    @default("pending") @db.VarChar(20)  // pending, success, failed
+  statusCode  Int?
+  responseBody String?  @db.Text
+  attempts    Int       @default(0)
+  nextRetryAt DateTime?
+  createdAt   DateTime  @default(now())
+  deliveredAt DateTime?
+  
+  webhook     TenantWebhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  
+  @@index([webhookId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
