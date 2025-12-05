@@ -2,13 +2,14 @@
 
 import { useState, Suspense, useEffect, useRef } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { X } from 'lucide-react'
+import { X, Save, CheckCircle2 } from 'lucide-react'
 import { CountryFlagSelector, type Country } from '../fields/CountryFlagSelector'
 import { ExistingEntityTab } from '../tabs/ExistingEntityTab'
 import { NewEntityTab } from '../tabs/NewEntityTab'
 import { SetupErrorBoundary } from '../components/SetupErrorBoundary'
 import { SetupModalSkeleton } from '../components/LoadingStates'
 import { analytics } from '../services/analytics'
+import { useAutoSave, loadDraft, clearDraft, hasDraft, getDraftAge } from '../hooks/useAutoSave'
 import type { SetupFormData } from '../types/setup'
 
 export interface SetupModalProps {
@@ -30,6 +31,7 @@ type TabType = 'existing' | 'new'
  * - Dark theme with mobile optimization
  * - Error boundary for graceful failures
  * - Analytics tracking
+ * - Auto-save with draft resume
  */
 export function SetupModal({ open, onOpenChange, onComplete }: SetupModalProps) {
     const [selectedCountry, setSelectedCountry] = useState<Country['code']>('AE')
@@ -38,9 +40,32 @@ export function SetupModal({ open, onOpenChange, onComplete }: SetupModalProps) 
         country: 'AE',
         businessType: 'existing'
     })
+    const [showDraftPrompt, setShowDraftPrompt] = useState(false)
+    const [draftAge, setDraftAge] = useState<string | null>(null)
 
     // Track when modal was opened for duration calculation
     const openTimeRef = useRef<number | null>(null)
+
+    // Auto-save form data
+    const { lastSaved } = useAutoSave(formData, open)
+    const [showSaveIndicator, setShowSaveIndicator] = useState(false)
+
+    // Show save indicator briefly after save
+    useEffect(() => {
+        if (lastSaved) {
+            setShowSaveIndicator(true)
+            const timeout = setTimeout(() => setShowSaveIndicator(false), 2000)
+            return () => clearTimeout(timeout)
+        }
+    }, [lastSaved])
+
+    // Check for draft when modal opens
+    useEffect(() => {
+        if (open && hasDraft()) {
+            setDraftAge(getDraftAge())
+            setShowDraftPrompt(true)
+        }
+    }, [open])
 
     // Track modal open/close
     useEffect(() => {
@@ -49,6 +74,21 @@ export function SetupModal({ open, onOpenChange, onComplete }: SetupModalProps) 
             analytics.modalOpened('dashboard')
         }
     }, [open])
+
+    const handleResumeDraft = () => {
+        const draft = loadDraft()
+        if (draft) {
+            setFormData(draft)
+            if (draft.country) setSelectedCountry(draft.country as Country['code'])
+            if (draft.businessType) setActiveTab(draft.businessType as TabType)
+        }
+        setShowDraftPrompt(false)
+    }
+
+    const handleDiscardDraft = () => {
+        clearDraft()
+        setShowDraftPrompt(false)
+    }
 
     const handleCountryChange = (country: Country['code']) => {
         setSelectedCountry(country)
@@ -71,6 +111,9 @@ export function SetupModal({ open, onOpenChange, onComplete }: SetupModalProps) 
             await onComplete(data)
         }
 
+        // Clear draft on successful submission
+        clearDraft()
+
         analytics.setupCompleted(data.businessType || 'new', data.country || 'AE', duration)
         onOpenChange(false)
     }
@@ -84,6 +127,38 @@ export function SetupModal({ open, onOpenChange, onComplete }: SetupModalProps) 
         onOpenChange(false)
     }
 
+    // Draft resume prompt
+    if (showDraftPrompt) {
+        return (
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="max-w-md bg-gray-900 border-gray-800 text-white p-6">
+                    <div className="text-center space-y-4">
+                        <div className="w-12 h-12 mx-auto bg-blue-500/20 rounded-full flex items-center justify-center">
+                            <Save className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <h3 className="text-lg font-semibold">Resume Your Draft?</h3>
+                        <p className="text-sm text-gray-400">
+                            You have an unsaved draft from {draftAge}. Would you like to continue where you left off?
+                        </p>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={handleDiscardDraft}
+                                className="flex-1 px-4 py-2 text-sm text-gray-300 hover:text-white border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
+                            >
+                                Start Fresh
+                            </button>
+                            <button
+                                onClick={handleResumeDraft}
+                                className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Resume Draft
+                            </button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        )
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

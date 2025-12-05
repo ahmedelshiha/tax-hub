@@ -1,7 +1,10 @@
-export { default as CountrySelectionStep } from './CountrySelectionStep'
-export { default as BusinessTypeSelectionStep } from './BusinessTypeSelectionStep'
+/**
+ * Step Components - DEPRECATED
+ * 
+ * The old 7-step wizard has been replaced with the single-step SetupModal.
+ * Only LicenseVerificationStep is kept for potential future use.
+ * 
+ * @deprecated Use SetupModal instead
+ */
+
 export { default as LicenseVerificationStep } from './LicenseVerificationStep'
-export { default as BusinessDetailsStep } from './BusinessDetailsStep'
-export { default as DocumentUploadStep } from './DocumentUploadStep'
-export { default as ReviewConfirmStep } from './ReviewConfirmStep'
-export { default as SubmissionStatusStep } from './SubmissionStatusStep'
