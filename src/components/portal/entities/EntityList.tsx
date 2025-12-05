@@ -15,6 +15,7 @@ interface EntityListProps {
     entities: EntityData[]
     isLoading?: boolean
     onAddBusiness?: () => void
+    onClone?: (newEntity: EntityData) => void
     title?: string
 }
 
@@ -22,6 +23,7 @@ export function EntityList({
     entities,
     isLoading,
     onAddBusiness,
+    onClone,
     title = 'Your Businesses'
 }: EntityListProps) {
     // Loading state
@@ -96,7 +98,7 @@ export function EntityList({
             </div>
             <div className="space-y-2">
                 {entities.map((entity) => (
-                    <EntityCard key={entity.id} entity={entity} />
+                    <EntityCard key={entity.id} entity={entity} onClone={onClone} />
                 ))}
             </div>
         </div>
