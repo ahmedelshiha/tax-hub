@@ -88,11 +88,13 @@ export function SearchableSelect<T>({
                 disabled={disabled}
                 className={`
           w-full px-4 py-2 text-left
-          border border-gray-300 rounded-md
+          border rounded-md
           bg-white dark:bg-gray-800
-          hover:border-gray-400 dark:hover:border-gray-500
+          border-gray-300 dark:border-gray-700
+          hover:border-gray-400 dark:hover:border-gray-600
           focus:outline-none focus:ring-2 focus:ring-blue-500
           disabled:opacity-50 disabled:cursor-not-allowed
+          text-gray-900 dark:text-gray-100
           ${isOpen ? 'ring-2 ring-blue-500' : ''}
         `}
                 aria-haspopup="listbox"
@@ -100,7 +102,7 @@ export function SearchableSelect<T>({
             >
                 {value && renderSelected ? renderSelected(value) :
                     value ? renderItem(value, () => '') :
-                        <span className="text-gray-400">{placeholder}</span>}
+                        <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>}
             </button>
 
             {/* Dropdown */}
@@ -108,7 +110,7 @@ export function SearchableSelect<T>({
                 <div className="
           absolute z-50 w-full mt-1
           bg-white dark:bg-gray-800
-          border border-gray-300 dark:border-gray-600
+          border border-gray-300 dark:border-gray-700
           rounded-md shadow-lg
         ">
                     <div className="p-2">
