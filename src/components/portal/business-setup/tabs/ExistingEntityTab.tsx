@@ -2,13 +2,12 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Loader2, Search, CheckCircle2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
 import { UAE_DEPARTMENTS, type EconomicDepartment } from '../constants/departments'
 import type { SetupFormData } from '../types/setup'
 import type { Country } from '../fields/CountryFlagSelector'
 import { validationService } from '../services/validationService'
-import { businessSetupApi, APIError } from '../services/businessSetupApi'
 
 export interface ExistingEntityTabProps {
     country: Country['code']
@@ -18,7 +17,8 @@ export interface ExistingEntityTabProps {
 }
 
 /**
- * Tab for existing businesses with license lookup
+ * Tab for existing businesses
+ * Users manually enter their license number and business details
  */
 export function ExistingEntityTab({
     country,
@@ -26,51 +26,9 @@ export function ExistingEntityTab({
     onFormDataChange,
     onSubmit
 }: ExistingEntityTabProps) {
-    const [isLookingUp, setIsLookingUp] = useState(false)
-    const [lookupSuccess, setLookupSuccess] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [termsAccepted, setTermsAccepted] = useState(false)
-
-    const handleLicenseLookup = async () => {
-        if (!formData.licenseNumber) {
-            setErrors({ licenseNumber: 'Please enter a license number' })
-            return
-        }
-
-        setIsLookingUp(true)
-        setErrors({})
-
-        try {
-            // Call real API
-            const result = await businessSetupApi.lookupLicense(
-                formData.licenseNumber,
-                country as 'AE' | 'SA' | 'EG'
-            )
-
-            if (result.found && result.data) {
-                onFormDataChange({
-                    ...formData,
-                    businessName: result.data.businessName,
-                    economicDepartment: result.data.economicDepartment,
-                    activities: result.data.activities,
-                })
-                setLookupSuccess(true)
-            } else {
-                setErrors({
-                    licenseNumber: result.error?.message || 'License not found or invalid'
-                })
-            }
-        } catch (error) {
-            if (error instanceof APIError) {
-                setErrors({ licenseNumber: error.message })
-            } else {
-                setErrors({ licenseNumber: 'Failed to lookup license. Please try again.' })
-            }
-        } finally {
-            setIsLookingUp(false)
-        }
-    }
 
     const handleSubmit = async () => {
         const validationErrors = validationService.validateForm({
@@ -106,51 +64,31 @@ export function ExistingEntityTab({
 
     return (
         <div className="space-y-6">
-            {/* License Number Input with Lookup */}
+            {/* License Number Input - Manual Entry */}
             <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                    License Number <span className="text-red-400">*</span>
+                    Trade License Number <span className="text-red-400">*</span>
                 </label>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        value={formData.licenseNumber || ''}
-                        onChange={(e) => {
-                            onFormDataChange({ ...formData, licenseNumber: e.target.value })
-                            setLookupSuccess(false)
-                        }}
-                        placeholder="Enter your license number (e.g., DMCC-123456)"
-                        className={`
-              flex-1 px-4 py-2.5
-              bg-gray-800 border rounded-lg
-              text-white placeholder-gray-500
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              ${errors.licenseNumber ? 'border-red-500' : 'border-gray-700'}
-            `}
-                    />
-                    <Button
-                        onClick={handleLicenseLookup}
-                        disabled={isLookingUp || !formData.licenseNumber}
-                        className="bg-blue-600 hover:bg-blue-700"
-                    >
-                        {isLookingUp ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : lookupSuccess ? (
-                            <CheckCircle2 className="w-4 h-4" />
-                        ) : (
-                            <Search className="w-4 h-4" />
-                        )}
-                        <span className="ml-2">Lookup</span>
-                    </Button>
-                </div>
+                <input
+                    type="text"
+                    value={formData.licenseNumber || ''}
+                    onChange={(e) => {
+                        onFormDataChange({ ...formData, licenseNumber: e.target.value })
+                        if (errors.licenseNumber) {
+                            setErrors({ ...errors, licenseNumber: '' })
+                        }
+                    }}
+                    placeholder="Enter your trade license number"
+                    className={`
+                        w-full px-4 py-2.5
+                        bg-gray-800 border rounded-lg
+                        text-white placeholder-gray-500
+                        focus:outline-none focus:ring-2 focus:ring-blue-500
+                        ${errors.licenseNumber ? 'border-red-500' : 'border-gray-700'}
+                    `}
+                />
                 {errors.licenseNumber && (
                     <p className="mt-1 text-sm text-red-400">{errors.licenseNumber}</p>
-                )}
-                {lookupSuccess && (
-                    <p className="mt-1 text-sm text-green-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        License verified successfully
-                    </p>
                 )}
             </div>
 
@@ -162,17 +100,20 @@ export function ExistingEntityTab({
                 <input
                     type="text"
                     value={formData.businessName || ''}
-                    onChange={(e) => onFormDataChange({ ...formData, businessName: e.target.value })}
-                    placeholder="Business legal name"
-                    disabled={!lookupSuccess}
+                    onChange={(e) => {
+                        onFormDataChange({ ...formData, businessName: e.target.value })
+                        if (errors.businessName) {
+                            setErrors({ ...errors, businessName: '' })
+                        }
+                    }}
+                    placeholder="Enter your business legal name"
                     className={`
-            w-full px-4 py-2.5
-            bg-gray-800 border rounded-lg
-            text-white placeholder-gray-500
-            focus:outline-none focus:ring-2 focus:ring-blue-500
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${errors.businessName ? 'border-red-500' : 'border-gray-700'}
-          `}
+                        w-full px-4 py-2.5
+                        bg-gray-800 border rounded-lg
+                        text-white placeholder-gray-500
+                        focus:outline-none focus:ring-2 focus:ring-blue-500
+                        ${errors.businessName ? 'border-red-500' : 'border-gray-700'}
+                    `}
                 />
                 {errors.businessName && (
                     <p className="mt-1 text-sm text-red-400">{errors.businessName}</p>
@@ -187,7 +128,12 @@ export function ExistingEntityTab({
                 <SearchableSelect<EconomicDepartment>
                     items={UAE_DEPARTMENTS}
                     value={selectedDepartment}
-                    onChange={(dept) => onFormDataChange({ ...formData, economicDepartment: dept?.id })}
+                    onChange={(dept) => {
+                        onFormDataChange({ ...formData, economicDepartment: dept?.id })
+                        if (errors.economicDepartment) {
+                            setErrors({ ...errors, economicDepartment: '' })
+                        }
+                    }}
                     searchKeys={['name', 'shortName', 'keywords']}
                     renderItem={(dept) => (
                         <div>
@@ -198,7 +144,6 @@ export function ExistingEntityTab({
                         </div>
                     )}
                     placeholder="Search departments..."
-                    disabled={!lookupSuccess}
                     className="w-full"
                 />
                 {errors.economicDepartment && (
@@ -231,7 +176,7 @@ export function ExistingEntityTab({
             <div className="pt-2">
                 <Button
                     onClick={handleSubmit}
-                    disabled={isSubmitting || !lookupSuccess || !termsAccepted}
+                    disabled={isSubmitting || !termsAccepted}
                     className="w-full bg-blue-600 hover:bg-blue-700 h-11"
                 >
                     {isSubmitting ? (
