@@ -3,6 +3,7 @@
 import { useState, lazy, Suspense, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Plus, Search } from "lucide-react";
 import { PageLayout, ActionHeader } from "@/components/ui-oracle";
 import { useModal } from "@/components/providers/ModalProvider";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { SetupModal } from "@/components/portal/business-setup/modal";
 
 // Lazy-loaded tab components
 const OverviewTab = lazy(() => import("@/components/portal/dashboard/tabs/OverviewTab"));
@@ -44,11 +46,24 @@ export default function PortalDashboardPage() {
   const { data: session } = useSession();
   const { openModal } = useModal();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   // Memoize the modal opener to prevent re-creating on every render
   const handleOpenGlobalSearch = useCallback(() => {
     openModal('global-search');
   }, [openModal]);
+
+  // Handle setup completion
+  const handleSetupComplete = useCallback((data: any) => {
+    toast.success('Business added successfully!');
+    // If we have an entityId from the API response, redirect to the entity page
+    if (data?.entityId) {
+      router.push(`/portal/businesses/${data.entityId}`);
+    } else {
+      // Refresh the current page to show the new entity
+      router.refresh();
+    }
+  }, [router]);
 
   // Global search keyboard shortcut (Cmd+K / Ctrl+K)
   useKeyboardShortcut({
@@ -99,7 +114,7 @@ export default function PortalDashboardPage() {
           primaryAction={
             <Button
               size="sm"
-              onClick={() => router.push("/portal/business-setup")}
+              onClick={() => setShowSetupModal(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Business
@@ -159,6 +174,13 @@ export default function PortalDashboardPage() {
           </span>
         </span>
       </div>
+
+      {/* Business Setup Modal */}
+      <SetupModal
+        open={showSetupModal}
+        onOpenChange={setShowSetupModal}
+        onComplete={handleSetupComplete}
+      />
     </PageLayout>
   );
 }
